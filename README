@@ -1,0 +1,3 @@
+This plugin remembers all the blocks that you place, and wont let
+any other player directly remove those plocks.  However, they may
+remove them with fire, lava, tnt, creepers, etc.
