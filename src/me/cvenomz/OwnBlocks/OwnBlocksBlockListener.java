@@ -17,7 +17,7 @@ public class OwnBlocksBlockListener extends BlockListener{
 	
 	private OwnBlocks pluginRef;
 	//private Map<Location, Player> blockPending;
-	private Map<Player, ArrayList> database;
+	private Map<OBBlock, String> database;
 	Logger log;
 	
 	OwnBlocksBlockListener(OwnBlocks ob)
@@ -29,53 +29,53 @@ public class OwnBlocksBlockListener extends BlockListener{
 	
 	public void onBlockBreak(BlockBreakEvent e)
 	{
-		pluginRef.log.info("Break from " + e.getPlayer().getName());
-		if (whoOwns(e.getBlock().getLocation()) == null || whoOwns(e.getBlock().getLocation()).equals(e.getPlayer()))
+		//pluginRef.log.info("Break from " + e.getPlayer().getName());
+		/*if (whoOwns(e.getBlock().getLocation()) == null || whoOwns(e.getBlock().getLocation()).equals(e.getPlayer()))
 				return;
 		else
 		{
 			e.setCancelled(true);
 			e.getPlayer().sendMessage(ChatColor.DARK_RED + "That block is not yours to break");
+		}*/
+		
+		Block b = e.getBlock();
+		OBBlock obb = new OBBlock(b);
+		String player = e.getPlayer().getName();
+		//listAll();
+		//e.getPlayer().sendMessage(ChatColor.DARK_BLUE + "Break");
+		if (database.containsKey(obb))
+		{
+			//e.getPlayer().sendMessage(ChatColor.DARK_RED + "true");
+			if (!database.get(obb).equals(player))
+			{
+				//e.getPlayer().sendMessage(ChatColor.AQUA + "true");
+				e.setCancelled(true);
+			}
 		}
 	}
 	
 	public void onBlockPlace(BlockPlaceEvent e)
 	{
-		pluginRef.log.info("received Place event from " + e.getPlayer().getName());
-		if (!database.containsKey(e.getPlayer()))
-			database.put(e.getPlayer(), new ArrayList());
+		//pluginRef.log.info("received Place event from " + e.getPlayer().getName());
+		//if (!database.containsKey(e.getPlayer()))
+		//	database.put(e.getPlayer(), new ArrayList());
 		
-		if (whoOwns(e.getBlock().getLocation()) == null)
+		/*if (whoOwns(e.getBlock().getLocation()) == null)
 			database.get(e.getPlayer()).add(e.getBlockPlaced());
 		else if (!whoOwns(e.getBlock().getLocation()).equals(e.getPlayer()))
 		{
 			database.get(whoOwns(e.getBlock().getLocation())).remove(e.getBlock());
 			database.get(e.getPlayer()).add(e.getBlock());
-		}
+		}*/
+		
+		OBBlock obb = new OBBlock(e.getBlockPlaced());
+		database.put(obb, e.getPlayer().getName());
 	}
 	
-	private Player whoOwns(Location loc)
+	
+	private void listAll()
 	{
-		Iterator<Player> players = database.keySet().iterator();
-		Iterator<Block> blocks;
-		Player player;
-		Block block;
-		while (players.hasNext())
-		{
-			player = players.next();
-			blocks = database.get(player).iterator();
-			while (blocks.hasNext())
-			{
-				block = blocks.next();
-				if (block.getLocation().equals(loc))
-				{
-					log.info("Block owned by " + player.getName());
-					return player;
-				}
-			}
-		}
-		log.info("No one owns this block");
-		return null;
+		log.info(database.keySet().toString());
 	}
 
 }

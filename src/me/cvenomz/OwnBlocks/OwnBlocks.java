@@ -20,10 +20,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class OwnBlocks extends JavaPlugin{
 
-	public String mainDirectory = "OwnBlocks";
+	public String mainDirectory = "plugins" + File.separator + "OwnBlocks";
 	public Logger log = Logger.getLogger("Minecraft");
 	//private File databaseFile = new File(mainDirectory + File.separator + "");
-	public Map<Player, ArrayList> database;
+	public Map<OBBlock, String> database;
 	public Map<Location, Player> pending;
 	private FileInputStream fis;
 	private FileOutputStream fos;
@@ -31,6 +31,7 @@ public class OwnBlocks extends JavaPlugin{
 	private ObjectOutputStream obo;
 	private File file;
 	private OwnBlocksBlockListener listener;
+	private double version = 2.0;
 	
 	@Override
 	public void onDisable() {
@@ -64,14 +65,15 @@ public class OwnBlocks extends JavaPlugin{
 				{
 					fis = new FileInputStream(file);
 					obi = new ObjectInputStream(fis);
-					database = (Map<Player, ArrayList>) obi.readObject();
+					database = (Map<OBBlock, String>) obi.readObject();
+					log.info("[OwnBlocks] Database read in from file");
 					fis.close();
 					obi.close();
 				}
 				else
 				{
 					log.info("[OwnBlocks] Database does not exist.  Creating initial database...");
-					database = new HashMap<Player, ArrayList>();
+					database = new HashMap<OBBlock, String>();
 				}
 		} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -88,63 +90,11 @@ public class OwnBlocks extends JavaPlugin{
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvent(Event.Type.BLOCK_PLACE, listener, Event.Priority.Normal, this);
 			pm.registerEvent(Event.Type.BLOCK_BREAK, listener, Event.Priority.Normal, this);
-			log.info("[OwnBlocks] version 1.0 initialized");
+			log.info("[OwnBlocks] version " + version + " initialized");
 		}
 		
 	}
 	
-	/* This method will read the ArrayList containing the list of blocks this player has created from their corresponding .db file,
-	 * and add this ArrayList to the main database (the Map<Player, ArrayList> called "database").
-	 * If this file does not exist, then a new, blank ArrayList will be added to the main database. 
-	 * 
-	 * False is returned if the file cannot be read*/
-	/*private boolean addToMap(Player player)
-	{
-		if (database.containsKey(player))
-			return true;
-		try {
-			ArrayList playerDB;
-			file = new File(mainDirectory + File.separator + player.getName() + ".db");
-			fis = new FileInputStream(file);
-			obi = new ObjectInputStream(fis);
-			if (file.exists())
-				playerDB = (ArrayList)obi.readObject();
-			else
-				playerDB = new ArrayList();
-			database.put(player, playerDB);
-			return true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			log.severe("Could not read player to database");
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			log.severe("Could not read player to database");
-			e.printStackTrace();
-		}
-		return false;
-	}*/
 	
-	/* This method will take a player's ArrayList listing the blocks they have created from the main database and write it to their .db file.
-	 * If this file does not exist, then it will be created.
-	 * 
-	 * Exception: If an exception is thrown during this process, this method will try to keep the players ArrayList still in RAM*/
-	/*private void removeFromMap(Player player)
-	{
-		try {
-			file = new File(mainDirectory + File.separator + player.getName() + ".db");
-			if (!file.exists())
-				file.createNewFile();
-			fos = new FileOutputStream(file);
-			obo = new ObjectOutputStream(fos);
-			obo.writeObject(database.get(player));
-			database.remove(player);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			log.severe("Could not write player data to file");
-			e.printStackTrace();
-		}
-
-	}*/
 
 }
