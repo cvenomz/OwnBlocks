@@ -42,6 +42,8 @@ public class OwnBlocksBlockListener extends BlockListener{
 				//e.getPlayer().sendMessage(ChatColor.AQUA + "true");
 				e.setCancelled(true);
 			}
+			else
+				database.remove(obb);
 		}
 	}
 	
@@ -50,8 +52,14 @@ public class OwnBlocksBlockListener extends BlockListener{
 		//Check if player is in the 'active' arraylist
 		if (pluginRef.activatedPlayers.contains(e.getPlayer().getName()))
 		{
-			OBBlock obb = new OBBlock(e.getBlockPlaced());
-			database.put(obb, e.getPlayer().getName());
+			//Check if block ID is excluded
+			//log.info(e.getPlayer().getName() + " placing " + e.getBlockPlaced().getTypeId());
+			if (!pluginRef.exclude.contains(e.getBlockPlaced().getTypeId()))
+			{
+				//log.info("Stored");
+				OBBlock obb = new OBBlock(e.getBlockPlaced());
+				database.put(obb, e.getPlayer().getName());
+			}
 		}
 	}
 	
