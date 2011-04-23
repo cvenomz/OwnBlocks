@@ -33,17 +33,19 @@ public class OwnBlocksBlockListener extends BlockListener{
 		OBBlock obb = new OBBlock(b);
 		String player = e.getPlayer().getName();
 		//listAll();
-		//e.getPlayer().sendMessage(ChatColor.DARK_BLUE + "Break");
+		//Is block protected
 		if (database.containsKey(obb))
 		{
-			//e.getPlayer().sendMessage(ChatColor.DARK_RED + "true");
+			//Is player NOT the owner of the block?
 			if (!database.get(obb).equals(player))
 			{
-				//e.getPlayer().sendMessage(ChatColor.AQUA + "true");
-				e.setCancelled(true);
+				if (pluginRef.permissions.has(e.getPlayer(), "OwnBlocks.ignoreOwnership")) //Is player a mod/OP
+					database.remove(obb);		//break block
+				else							//Player is not a mod/OP
+					e.setCancelled(true);		//dont break block, because they are not an OP, nor are they the owner.
 			}
-			else
-				database.remove(obb);
+			else								//Player is owner of block
+				database.remove(obb);			//break block, because they are the owner
 		}
 	}
 	

@@ -20,8 +20,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 public class OwnBlocks extends JavaPlugin{
 
@@ -40,13 +44,14 @@ public class OwnBlocks extends JavaPlugin{
 	private File propertiesFile;
 	private OwnBlocksBlockListener blockListener;
 	private OwnBlocksPlayerListener playerListener;
-	private double version = 4.0;
+	public PermissionHandler permissions;
+	private double version = 5.0;
 	
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
 		try {
-			removeAllPlayers();
+			//removeAllPlayers();
 			fos = new FileOutputStream(file);
 			obo = new ObjectOutputStream(fos);
 			obo.writeObject(database);
@@ -109,8 +114,11 @@ public class OwnBlocks extends JavaPlugin{
 			}
 			exclude = new ArrayList<Integer>();
 			readProperties();
-			activatedPlayers = new ArrayList<String>();
-			addCurrentPlayers();
+			if (activatedPlayers == null)	//will be null if starting up, but not for a reload?
+			{
+				activatedPlayers = new ArrayList<String>();
+				addCurrentPlayers();
+			}
 			blockListener = new OwnBlocksBlockListener(this);
 			playerListener = new OwnBlocksPlayerListener(this);
 			PluginManager pm = getServer().getPluginManager();
@@ -118,6 +126,7 @@ public class OwnBlocks extends JavaPlugin{
 			pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
 			pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
 			pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
+			setupPermissions();
 			log.info("[OwnBlocks] version " + version + " initialized");
 		}
 		
@@ -223,6 +232,18 @@ public class OwnBlocks extends JavaPlugin{
 				}catch (NumberFormatException e)
 				{log.severe("[OwnBlocks] Error reading exclude IDs -- Not an Integer");}
 			}
+		}
+	}
+	
+	private void setupPermissions()
+	{
+		Plugin permRef = this.getServer().getPluginManager().getPlugin("Permissions");
+		if (permissions == null)
+		{
+			if (permRef != null)
+				permissions = ((Permissions)permRef).getHandler();
+			else
+				log.info("Permission system not detected, defaulting to OP");
 		}
 	}
 	
