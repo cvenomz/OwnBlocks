@@ -28,16 +28,7 @@ public class OwnBlocksBlockListener extends BlockListener{
 	}
 	
 	public void onBlockBreak(BlockBreakEvent e)
-	{
-		//pluginRef.log.info("Break from " + e.getPlayer().getName());
-		/*if (whoOwns(e.getBlock().getLocation()) == null || whoOwns(e.getBlock().getLocation()).equals(e.getPlayer()))
-				return;
-		else
-		{
-			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatColor.DARK_RED + "That block is not yours to break");
-		}*/
-		
+	{	
 		Block b = e.getBlock();
 		OBBlock obb = new OBBlock(b);
 		String player = e.getPlayer().getName();
@@ -56,20 +47,12 @@ public class OwnBlocksBlockListener extends BlockListener{
 	
 	public void onBlockPlace(BlockPlaceEvent e)
 	{
-		//pluginRef.log.info("received Place event from " + e.getPlayer().getName());
-		//if (!database.containsKey(e.getPlayer()))
-		//	database.put(e.getPlayer(), new ArrayList());
-		
-		/*if (whoOwns(e.getBlock().getLocation()) == null)
-			database.get(e.getPlayer()).add(e.getBlockPlaced());
-		else if (!whoOwns(e.getBlock().getLocation()).equals(e.getPlayer()))
+		//Check if player is in the 'active' arraylist
+		if (pluginRef.activatedPlayers.contains(e.getPlayer().getName()))
 		{
-			database.get(whoOwns(e.getBlock().getLocation())).remove(e.getBlock());
-			database.get(e.getPlayer()).add(e.getBlock());
-		}*/
-		
-		OBBlock obb = new OBBlock(e.getBlockPlaced());
-		database.put(obb, e.getPlayer().getName());
+			OBBlock obb = new OBBlock(e.getBlockPlaced());
+			database.put(obb, e.getPlayer().getName());
+		}
 	}
 	
 	

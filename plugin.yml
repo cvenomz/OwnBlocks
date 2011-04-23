@@ -2,3 +2,8 @@ name: OwnBlocks
 main: me.cvenomz.OwnBlocks.OwnBlocks
 version: 1.0
 author: cvenomz
+commands:
+  ownblocks:
+    aliases: [ob]
+    description: toggle per-player OwnBlocks activation
+    usage: /<command>
