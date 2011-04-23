@@ -198,7 +198,8 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#regarldess of if they have OwnBlocks activated, enter the ID of the item" +
 						"\n#after the exclude key (comma separated; no spaces)" +
 						"\n#The example below would exclude Dirt(03) and Sand(12) from being added to the database" +
-						"\n#exclude=03,12" +
+						"\n#\n#exclude=03,12" +
+						"\n\n" +
 						"\n#Please Note: changes are not retro-active. In this example, dirt placed before being excluded" +
 						"\n#Would still be protected, even after it is added to the 'exclude list'");
 			pw.close();
