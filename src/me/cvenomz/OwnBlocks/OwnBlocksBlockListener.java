@@ -1,17 +1,14 @@
 package me.cvenomz.OwnBlocks;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
+
+import com.nijiko.coelho.iConomy.system.Account;
 
 public class OwnBlocksBlockListener extends BlockListener{
 	
@@ -59,8 +56,23 @@ public class OwnBlocksBlockListener extends BlockListener{
 			if (!pluginRef.exclude.contains(e.getBlockPlaced().getTypeId()))
 			{
 				//log.info("Stored");
-				OBBlock obb = new OBBlock(e.getBlockPlaced());
-				database.put(obb, e.getPlayer().getName());
+				
+				//check iConomy
+				if (pluginRef.useiConomy())
+				{
+					Account account = pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName());
+					if (account.getBalance() >= pluginRef.getRate())
+					{
+						account.subtract(pluginRef.getRate());
+						OBBlock obb = new OBBlock(e.getBlockPlaced());
+						database.put(obb, e.getPlayer().getName());
+					}
+				}
+				else
+				{
+					OBBlock obb = new OBBlock(e.getBlockPlaced());
+					database.put(obb, e.getPlayer().getName());
+				}
 			}
 		}
 	}

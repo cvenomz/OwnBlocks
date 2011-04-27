@@ -26,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.nijiko.coelho.iConomy.iConomy;
 
 public class OwnBlocks extends JavaPlugin{
 
@@ -42,10 +43,13 @@ public class OwnBlocks extends JavaPlugin{
 	private ObjectOutputStream obo;
 	private File file;
 	private File propertiesFile;
+	private boolean useiConomy;
+	private int iConomyRate;
 	private OwnBlocksBlockListener blockListener;
 	private OwnBlocksPlayerListener playerListener;
 	public PermissionHandler permissions;
-	private double version = 5.0;
+	public iConomy iConomy;
+	private double version = 6.0;
 	
 	@Override
 	public void onDisable() {
@@ -141,14 +145,14 @@ public class OwnBlocks extends JavaPlugin{
 		}
 	}
 	
-	private void removeAllPlayers()
+	/*private void removeAllPlayers()
 	{
 		for (String name : activatedPlayers)
 		{
 			getServer().getPlayer(name).sendMessage(ChatColor.DARK_PURPLE + "Server is Deactivating OwnBlocks--");
 			removePlayer(name);
 		}
-	}
+	}*/
 	
 	public void addPlayer(String name)
 	{
@@ -221,6 +225,7 @@ public class OwnBlocks extends JavaPlugin{
 	
 	private void readProperties()
 	{
+		//get exclude string
 		String str = properties.getProperty("exclude");
 		if (str != null)
 		{
@@ -233,6 +238,30 @@ public class OwnBlocks extends JavaPlugin{
 				{log.severe("[OwnBlocks] Error reading exclude IDs -- Not an Integer");}
 			}
 		}
+		
+		//get iConomy string
+		str = properties.getProperty("iConomy");
+		int tmp;
+		if (str != null)
+		{
+			try{
+				tmp = Integer.parseInt(str);
+				if (tmp > 0)
+				{
+					useiConomy = true;
+					iConomyRate = tmp;
+					log.info("[OwnBlocks] iConomy support activated. Rate=" + iConomyRate);
+				}
+				else
+					useiConomy = false;
+			} catch (NumberFormatException e)
+			{
+				log.severe("[OwnBlocks] iConomy support cannot be activated. The rate is not a proper number");
+				useiConomy = false;
+			}
+		}
+		else
+			useiConomy = false;
 	}
 	
 	private void setupPermissions()
@@ -245,6 +274,31 @@ public class OwnBlocks extends JavaPlugin{
 			else
 				log.info("Permission system not detected, defaulting to OP");
 		}
+	}
+	
+	private void setupiConomy()
+	{
+		Plugin iConRef = this.getServer().getPluginManager().getPlugin("iConomy");
+		if (iConomy == null)
+		{
+			if (iConRef != null)
+				iConomy = ((iConomy)iConRef);
+			else
+			{
+				log.info("[OwnBlocks] iConomy not detected. No iConomy integration");
+				useiConomy = false;
+			}
+		}
+	}
+	
+	public boolean useiConomy()
+	{
+		return useiConomy;
+	}
+	
+	public int getRate()
+	{
+		return iConomyRate;
 	}
 	
 	
