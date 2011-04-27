@@ -214,7 +214,10 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#\n#exclude=03,12" +
 						"\n\n" +
 						"\n#Please Note: changes are not retro-active. In this example, dirt placed before being excluded" +
-						"\n#Would still be protected, even after it is added to the 'exclude list'");
+						"\n#Would still be protected, even after it is added to the 'exclude list'" +
+						"\n\n#To charge players a basic rate to their iConomy accounts, enter the amount (Integer)" +
+						"\n#that you wish to charge them per block they protect. Values <= 0 disable iConomy" +
+						"\niConomy=0");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
