@@ -16,12 +16,14 @@ public class OwnBlocksBlockListener extends BlockListener{
 	//private Map<Location, Player> blockPending;
 	private Map<OBBlock, String> database;
 	Logger log;
+	boolean debug;
 	
 	OwnBlocksBlockListener(OwnBlocks ob)
 	{
 		pluginRef = ob;
 		database = pluginRef.database;
 		log = pluginRef.log;
+		debug = pluginRef.debug;
 	}
 	
 	public void onBlockBreak(BlockBreakEvent e)
@@ -60,18 +62,21 @@ public class OwnBlocksBlockListener extends BlockListener{
 				//check iConomy
 				if (pluginRef.useiConomy())
 				{
+					debugMessage("Use iConomy == true");
 					Account account = pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName());
 					if (account.getBalance() >= pluginRef.getRate())
 					{
 						account.subtract(pluginRef.getRate());
 						OBBlock obb = new OBBlock(e.getBlockPlaced());
 						database.put(obb, e.getPlayer().getName());
+						debugMessage("acct. balance >= Rate, iConomy block placed");
 					}
 				}
 				else
 				{
 					OBBlock obb = new OBBlock(e.getBlockPlaced());
 					database.put(obb, e.getPlayer().getName());
+					debugMessage("Block placed - not with iConomy");
 				}
 			}
 		}
@@ -81,6 +86,11 @@ public class OwnBlocksBlockListener extends BlockListener{
 	private void listAll()
 	{
 		log.info(database.keySet().toString());
+	}
+	
+	private void debugMessage(String str)
+	{
+		pluginRef.debugMessage(str);
 	}
 
 }

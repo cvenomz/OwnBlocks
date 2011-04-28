@@ -49,7 +49,8 @@ public class OwnBlocks extends JavaPlugin{
 	private OwnBlocksPlayerListener playerListener;
 	public PermissionHandler permissions;
 	public iConomy iConomy;
-	private double version = 6.0;
+	public boolean debug = true;
+	private double version = 6.1;
 	
 	@Override
 	public void onDisable() {
@@ -302,6 +303,12 @@ public class OwnBlocks extends JavaPlugin{
 	public int getRate()
 	{
 		return iConomyRate;
+	}
+	
+	public void debugMessage(String str)
+	{
+		if (debug)
+			log.info("[OwnBlocks] " + str);
 	}
 	
 	
