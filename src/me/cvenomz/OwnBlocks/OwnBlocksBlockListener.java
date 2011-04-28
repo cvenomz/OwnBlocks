@@ -71,6 +71,11 @@ public class OwnBlocksBlockListener extends BlockListener{
 						database.put(obb, e.getPlayer().getName());
 						debugMessage("acct. balance >= Rate, iConomy block placed");
 					}
+					else
+					{
+						debugMessage("acct. funds insufficient, block not placed");
+						e.setCancelled(true);
+					}
 				}
 				else
 				{
