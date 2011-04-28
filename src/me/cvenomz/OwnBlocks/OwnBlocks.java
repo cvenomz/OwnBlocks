@@ -50,7 +50,7 @@ public class OwnBlocks extends JavaPlugin{
 	public PermissionHandler permissions;
 	public iConomy iConomy;
 	public boolean debug = true;
-	private double version = 6.1;
+	private double version = 6.2;
 	
 	@Override
 	public void onDisable() {
