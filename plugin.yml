@@ -1,6 +1,6 @@
 name: OwnBlocks
 main: me.cvenomz.OwnBlocks.OwnBlocks
-version: 6.3
+version: 6.4
 author: cvenomz
 commands:
   ownblocks:
