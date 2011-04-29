@@ -49,8 +49,8 @@ public class OwnBlocks extends JavaPlugin{
 	private OwnBlocksPlayerListener playerListener;
 	public PermissionHandler permissions;
 	public iConomy iConomy;
-	public boolean debug = true;
-	private double version = 6.2;
+	public boolean debug = false;
+	private double version = 6.3;
 	
 	@Override
 	public void onDisable() {
@@ -218,7 +218,9 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#Would still be protected, even after it is added to the 'exclude list'" +
 						"\n\n#To charge players a basic rate to their iConomy accounts, enter the amount (Integer)" +
 						"\n#that you wish to charge them per block they protect. Values <= 0 disable iConomy" +
-						"\niConomy=0");
+						"\niConomy=0" +
+						"\n\n#Uncomment to enable debug mode" + 
+						"\n#debug=true");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -266,6 +268,10 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		else
 			useiConomy = false;
+		
+		str = properties.getProperty("debug");
+		if (str.equalsIgnoreCase("true"))
+			debug = true;
 	}
 	
 	private void setupPermissions()
