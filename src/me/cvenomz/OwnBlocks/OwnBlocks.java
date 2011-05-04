@@ -59,7 +59,7 @@ public class OwnBlocks extends JavaPlugin{
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
-			
+		log.info("[OwnBlocks] Going to try to write database to file...");
 		writeDatabaseToFile();
 		
 		
@@ -219,9 +219,9 @@ public class OwnBlocks extends JavaPlugin{
 						"\niConomy=0" +
 						"\n\n#Uncomment to enable debug mode" + 
 						"\n#debug=true" + 
-						"\n\nstatus-message is the message sent to players telling them when OwnBlocks has" +
+						"\n\n#status-message is the message sent to players telling them when OwnBlocks has" +
 						"\n#been activated or deactivated for them. Options are: [enable, disable, simple]" +
-						"\n#status-message=enable" +
+						"\nstatus-message=enable" +
 						"\n\n#Number of seconds between database saves.  '0' to disable (not reccommended)" +
 						"\nsave-interval=60");
 			pw.close();
@@ -357,7 +357,7 @@ public class OwnBlocks extends JavaPlugin{
 			obo.writeObject(database);
 			obo.close();
 			fos.close();
-			log.info("[OwnBlocks] Wrote database to file");
+			debugMessage("[OwnBlocks] Wrote database to file");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			bool = false;
