@@ -53,26 +53,14 @@ public class OwnBlocks extends JavaPlugin{
 	public iConomy iConomy;
 	public boolean debug = false;
 	public StatusMessage statusMessage = StatusMessage.ENABLED;
-	private double version = 6.5;
+	private SaveDatabase saveDatabaseRef;
+	private double version = 7.0;
 	
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
-		try {
-			//removeAllPlayers();
-			fos = new FileOutputStream(file);
-			obo = new ObjectOutputStream(fos);
-			obo.writeObject(database);
-			obo.close();
-			fos.close();
-			log.info("[OwnBlocks] Wrote database to file");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			
+		writeDatabaseToFile();
 		
 		
 	}
@@ -223,7 +211,7 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#after the exclude key (comma separated; no spaces)" +
 						"\n#The example below would exclude Dirt(03) and Sand(12) from being added to the database" +
 						"\n#\n#exclude=03,12" +
-						"\n\n" +
+						"\n" +
 						"\n#Please Note: changes are not retro-active. In this example, dirt placed before being excluded" +
 						"\n#Would still be protected, even after it is added to the 'exclude list'" +
 						"\n\n#To charge players a basic rate to their iConomy accounts, enter the amount (Integer)" +
@@ -231,9 +219,11 @@ public class OwnBlocks extends JavaPlugin{
 						"\niConomy=0" +
 						"\n\n#Uncomment to enable debug mode" + 
 						"\n#debug=true" + 
-						"\n\n#status-message is the message sent to players telling them when OwnBlocks has" +
+						"\n\nstatus-message is the message sent to players telling them when OwnBlocks has" +
 						"\n#been activated or deactivated for them. Options are: [enable, disable, simple]" +
-						"\n#status-message=enable");
+						"\n#status-message=enable" +
+						"\n\n#Number of seconds between database saves.  '0' to disable (not reccommended)" +
+						"\nsave-interval=60");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -297,6 +287,21 @@ public class OwnBlocks extends JavaPlugin{
 				statusMessage = StatusMessage.SIMPLE;
 		}
 		
+		str = properties.getProperty("save-interval");
+		if (str != null)
+		{
+			saveDatabaseRef = new SaveDatabase(this);
+			long interval = 60*20L;
+			try{
+				interval = 20*Long.parseLong(str);
+			}catch (NumberFormatException e) {log.severe("[OwnBlocks] save-interval not a number, defaulting to 60s");}
+			if (interval > 0)
+			{
+				int code = getServer().getScheduler().scheduleSyncRepeatingTask(this, saveDatabaseRef, interval, interval);
+				//log.info("Code: "+code); //debug
+			}
+		}
+		
 	}
 	
 	private void setupPermissions()
@@ -340,6 +345,30 @@ public class OwnBlocks extends JavaPlugin{
 	{
 		if (debug)
 			log.info("[OwnBlocks] " + str);
+	}
+	
+	public boolean writeDatabaseToFile()
+	{
+		boolean bool = true;
+		try {
+			//removeAllPlayers();
+			fos = new FileOutputStream(file);
+			obo = new ObjectOutputStream(fos);
+			obo.writeObject(database);
+			obo.close();
+			fos.close();
+			log.info("[OwnBlocks] Wrote database to file");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			bool = false;
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			bool = false;
+			e.printStackTrace();
+		}
+		
+		return bool;
 	}
 	
 	
