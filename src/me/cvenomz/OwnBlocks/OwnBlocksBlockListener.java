@@ -3,6 +3,7 @@ package me.cvenomz.OwnBlocks;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
@@ -74,7 +75,7 @@ public class OwnBlocksBlockListener extends BlockListener{
 					else
 					{
 						debugMessage("acct. funds insufficient, block not placed");
-						e.getPlayer().sendMessage("You dont have enough money to place this block it costs " + pluginRef.getRate() + ", but you only have " + pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName()).getBalance());
+						e.getPlayer().sendMessage(ChatColor.YELLOW + "You dont have enough money to place this block it costs " + pluginRef.getRate() + ", but you only have " + pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName()).getBalance());
 						e.setCancelled(true);
 					}
 				}

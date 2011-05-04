@@ -54,7 +54,8 @@ public class OwnBlocks extends JavaPlugin{
 	public boolean debug = false;
 	public StatusMessage statusMessage = StatusMessage.ENABLED;
 	private SaveDatabase saveDatabaseRef;
-	private double version = 7.0;
+	private int infoID = 0;
+	private double version = 8.0;
 	
 	@Override
 	public void onDisable() {
@@ -223,7 +224,10 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#been activated or deactivated for them. Options are: [enable, disable, simple]" +
 						"\nstatus-message=enable" +
 						"\n\n#Number of seconds between database saves.  '0' to disable (not reccommended)" +
-						"\nsave-interval=60");
+						"\nsave-interval=60" + 
+						"\n\n#Id of material that when used will display the owner of a placed block." +
+						"\n#default value is 269, which is a wooden shovel" +
+						"\ninfo-id=269");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -302,6 +306,17 @@ public class OwnBlocks extends JavaPlugin{
 			}
 		}
 		
+		str = properties.getProperty("info-id");
+		if (str != null)
+		{
+			try{
+				infoID = Integer.parseInt(str);
+			}catch (NumberFormatException e)
+			{
+				log.severe("[OwnBlocks] info-id not a number.  Defaulting to 269.");
+			}
+		}
+		
 	}
 	
 	private void setupPermissions()
@@ -369,6 +384,11 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		
 		return bool;
+	}
+	
+	public int getInfoID()
+	{
+		return infoID;
 	}
 	
 	
