@@ -29,6 +29,8 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import com.nijiko.coelho.iConomy.iConomy;
 
 public class OwnBlocks extends JavaPlugin{
+	
+	public enum StatusMessage{ENABLED,DISABLED,SIMPLE}
 
 	public String mainDirectory = "plugins" + File.separator + "OwnBlocks";
 	public Logger log = Logger.getLogger("Minecraft");
@@ -50,6 +52,7 @@ public class OwnBlocks extends JavaPlugin{
 	public PermissionHandler permissions;
 	public iConomy iConomy;
 	public boolean debug = false;
+	public StatusMessage statusMessage = StatusMessage.ENABLED;
 	private double version = 6.5;
 	
 	@Override
@@ -160,7 +163,11 @@ public class OwnBlocks extends JavaPlugin{
 		if (!activatedPlayers.contains(name))
 		{
 			activatedPlayers.add(name);
-			getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
+			if (statusMessage == StatusMessage.ENABLED)
+				getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
+			else if (statusMessage == StatusMessage.SIMPLE)
+				getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
+
 		}
 	}
 	
@@ -169,7 +176,10 @@ public class OwnBlocks extends JavaPlugin{
 		if (activatedPlayers.contains(name))
 		{
 			activatedPlayers.remove(name);
-			getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
+			if (statusMessage == StatusMessage.ENABLED)
+				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
+			if (statusMessage == StatusMessage.SIMPLE)
+				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + ": OwnBlocks deactivated");
 		}
 	}
 	
@@ -220,7 +230,10 @@ public class OwnBlocks extends JavaPlugin{
 						"\n#that you wish to charge them per block they protect. Values <= 0 disable iConomy" +
 						"\niConomy=0" +
 						"\n\n#Uncomment to enable debug mode" + 
-						"\n#debug=true");
+						"\n#debug=true" + 
+						"\n\n#status-message is the message sent to players telling them when OwnBlocks has" +
+						"\n#been activated or deactivated for them. Options are: [enable, disable, simple]" +
+						"\n#status-message=enable");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -273,6 +286,16 @@ public class OwnBlocks extends JavaPlugin{
 		if (str != null && str.equalsIgnoreCase("true"))
 			debug = true;
 		
+		str = properties.getProperty("status-message");
+		if (str != null)
+		{
+			if (str.equalsIgnoreCase("enabled"))
+				statusMessage = StatusMessage.ENABLED;
+			else if (str.equalsIgnoreCase("disabled"))
+				statusMessage = StatusMessage.DISABLED;
+			else if (str.equalsIgnoreCase("simple"))
+				statusMessage = StatusMessage.SIMPLE;
+		}
 		
 	}
 	
