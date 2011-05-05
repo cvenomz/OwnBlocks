@@ -39,7 +39,7 @@ public class OwnBlocksBlockListener extends BlockListener{
 			//Is player NOT the owner of the block?
 			if (!database.get(obb).equals(player))
 			{
-				if (pluginRef.permissions.has(e.getPlayer(), "OwnBlocks.ignoreOwnership")) //Is player a mod/OP
+				if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.ignoreOwnership")) //Is player a mod/OP
 					database.remove(obb);		//break block
 				else							//Player is not a mod/OP
 					e.setCancelled(true);		//dont break block, because they are not an OP, nor are they the owner.

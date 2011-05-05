@@ -42,8 +42,10 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 		pluginRef.debugMessage("PlayerInteractEvent");
 		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
-		if (e.getItem() != null && e.getItem().getTypeId() == pluginRef.getInfoID())
-			handleInfo(e);
+		
+		if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.info"))
+			if (e.getItem() != null && e.getItem().getTypeId() == pluginRef.getInfoID())
+				handleInfo(e);
 	}
 	
 	private void handleInfo(PlayerInteractEvent e)

@@ -49,13 +49,13 @@ public class OwnBlocks extends JavaPlugin{
 	private int iConomyRate;
 	private OwnBlocksBlockListener blockListener;
 	private OwnBlocksPlayerListener playerListener;
-	public PermissionHandler permissions;
+	private PermissionHandler permissions;
 	public iConomy iConomy;
 	public boolean debug = false;
 	public StatusMessage statusMessage = StatusMessage.ENABLED;
 	private SaveDatabase saveDatabaseRef;
 	private int infoID = 0;
-	private double version = 8.1;
+	private double version = 9.0;
 	
 	@Override
 	public void onDisable() {
@@ -150,14 +150,17 @@ public class OwnBlocks extends JavaPlugin{
 	
 	public void addPlayer(String name)
 	{
-		if (!activatedPlayers.contains(name))
+		if (hasPermission(name, "OwnBlocks.use"))
 		{
-			activatedPlayers.add(name);
-			if (statusMessage == StatusMessage.ENABLED)
-				getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
-			else if (statusMessage == StatusMessage.SIMPLE)
-				getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
-
+			if (!activatedPlayers.contains(name))
+			{
+				activatedPlayers.add(name);
+				if (statusMessage == StatusMessage.ENABLED)
+					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
+				else if (statusMessage == StatusMessage.SIMPLE)
+					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
+	
+			}
 		}
 	}
 	
@@ -390,6 +393,23 @@ public class OwnBlocks extends JavaPlugin{
 	public int getInfoID()
 	{
 		return infoID;
+	}
+	
+	public boolean hasPermission(Player p, String node)
+	{
+		if (permissions != null)
+		{
+			return permissions.has(p, node);
+		}
+		else
+		{
+			return p.isOp();
+		}
+	}
+	
+	public boolean hasPermission(String player, String node)
+	{
+		return hasPermission(getServer().getPlayer(player), node);
 	}
 	
 	
