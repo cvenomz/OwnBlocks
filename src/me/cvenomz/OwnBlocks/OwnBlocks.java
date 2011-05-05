@@ -55,7 +55,7 @@ public class OwnBlocks extends JavaPlugin{
 	public StatusMessage statusMessage = StatusMessage.ENABLED;
 	private SaveDatabase saveDatabaseRef;
 	private int infoID = 0;
-	private double version = 8.0;
+	private double version = 8.1;
 	
 	@Override
 	public void onDisable() {
@@ -123,6 +123,7 @@ public class OwnBlocks extends JavaPlugin{
 			pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
 			pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
 			pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
+			pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Normal, this);
 			setupPermissions();
 			log.info("[OwnBlocks] version " + version + " initialized");
 		}
@@ -372,7 +373,7 @@ public class OwnBlocks extends JavaPlugin{
 			obo.writeObject(database);
 			obo.close();
 			fos.close();
-			debugMessage("[OwnBlocks] Wrote database to file");
+			debugMessage("Wrote database to file");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			bool = false;

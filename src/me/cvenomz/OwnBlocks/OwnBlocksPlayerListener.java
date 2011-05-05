@@ -39,9 +39,10 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent e)
 	{
-		if (e.getAction() != Action.LEFT_CLICK_BLOCK)
+		pluginRef.debugMessage("PlayerInteractEvent");
+		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
-		if (e.getItem().getTypeId() == pluginRef.getInfoID())
+		if (e.getItem() != null && e.getItem().getTypeId() == pluginRef.getInfoID())
 			handleInfo(e);
 	}
 	
