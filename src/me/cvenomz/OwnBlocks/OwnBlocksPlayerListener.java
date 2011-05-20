@@ -24,9 +24,11 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		// TODO Auto-generated method stub
 		//super.onPlayerJoin(event);
-		
-		String player = event.getPlayer().getName();
-		pluginRef.addPlayer(player);
+		if (pluginRef.getEnabledOnLogin())
+		{
+			String player = event.getPlayer().getName();
+			pluginRef.addPlayer(player);
+		}
 	}
 	
 	@Override
@@ -36,7 +38,7 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 		pluginRef.removePlayer(player);
 	}
 	
-	@Override
+	/*@Override
 	public void onPlayerInteract(PlayerInteractEvent e)
 	{
 		pluginRef.debugMessage("PlayerInteractEvent");
@@ -46,6 +48,27 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 		if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.info"))
 			if (e.getItem() != null && e.getItem().getTypeId() == pluginRef.getInfoID())
 				handleInfo(e);
+	}*/
+	
+	@Override
+	public void onPlayerInteract(PlayerInteractEvent e)
+	{
+		pluginRef.debugMessage("PlayerInteractEvent");
+		if (e.getItem() == null)
+			return;
+		
+		//Info
+		if (e.getItem().getTypeId() == pluginRef.getInfoID())
+			if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
+				if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.info"))
+					handleInfo(e);
+		
+		//Add
+		if (e.getItem().getTypeId() == pluginRef.getAddID())
+			if (e.getAction() == Action.LEFT_CLICK_BLOCK)
+				if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.add"))
+					handleAdd(e);
+		
 	}
 	
 	private void handleInfo(PlayerInteractEvent e)
@@ -58,6 +81,20 @@ public class OwnBlocksPlayerListener extends PlayerListener{
 		else
 		{
 			e.getPlayer().sendMessage(ChatColor.YELLOW + "Block not owned");
+		}
+	}
+	
+	private void handleAdd(PlayerInteractEvent e)
+	{
+		OBBlock obb = new OBBlock(e.getClickedBlock());
+		if (database.containsKey(obb))
+		{
+			e.getPlayer().sendMessage(ChatColor.YELLOW + "Can't add " + obb.toString() + " already owned");
+		}
+		else
+		{
+			database.put(obb, e.getPlayer().getName());
+			e.getPlayer().sendMessage(ChatColor.YELLOW + "Added " + obb.toString());
 		}
 	}
 

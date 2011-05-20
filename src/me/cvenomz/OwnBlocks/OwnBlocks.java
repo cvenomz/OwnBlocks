@@ -30,7 +30,7 @@ import com.nijiko.coelho.iConomy.iConomy;
 
 public class OwnBlocks extends JavaPlugin{
 	
-	public enum StatusMessage{ENABLED,DISABLED,SIMPLE}
+	public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
 
 	public String mainDirectory = "plugins" + File.separator + "OwnBlocks";
 	public Logger log = Logger.getLogger("Minecraft");
@@ -44,6 +44,7 @@ public class OwnBlocks extends JavaPlugin{
 	private ObjectInputStream obi;
 	private ObjectOutputStream obo;
 	private File file;
+	private File tmpDatabaseFile;
 	private File propertiesFile;
 	private boolean useiConomy;
 	private int iConomyRate;
@@ -52,10 +53,12 @@ public class OwnBlocks extends JavaPlugin{
 	private PermissionHandler permissions;
 	public iConomy iConomy;
 	public boolean debug = false;
-	public StatusMessage statusMessage = StatusMessage.ENABLED;
+	public StatusMessage statusMessage = StatusMessage.ENABLE;
 	private SaveDatabase saveDatabaseRef;
-	private int infoID = 0;
-	private double version = 9.0;
+	private int infoID = 269;
+	private int addID = 268;
+	private boolean enabledOnLogin = true;
+	private double version = 10.0;
 	
 	@Override
 	public void onDisable() {
@@ -73,6 +76,7 @@ public class OwnBlocks extends JavaPlugin{
 		
 		try {
 				file = new File(mainDirectory + File.separator + "Database.db");
+				tmpDatabaseFile = new File(mainDirectory + File.separator + "Database_tmp.db");
 				if (file.exists())
 				{
 					fis = new FileInputStream(file);
@@ -114,7 +118,7 @@ public class OwnBlocks extends JavaPlugin{
 			if (activatedPlayers == null)	//will be null if starting up, but not for a reload?
 			{
 				activatedPlayers = new ArrayList<String>();
-				addCurrentPlayers();
+				//addCurrentPlayers();  Disabled adding players onEnable()
 			}
 			blockListener = new OwnBlocksBlockListener(this);
 			playerListener = new OwnBlocksPlayerListener(this);
@@ -155,7 +159,7 @@ public class OwnBlocks extends JavaPlugin{
 			if (!activatedPlayers.contains(name))
 			{
 				activatedPlayers.add(name);
-				if (statusMessage == StatusMessage.ENABLED)
+				if (statusMessage == StatusMessage.ENABLE)
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
 				else if (statusMessage == StatusMessage.SIMPLE)
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
@@ -169,10 +173,10 @@ public class OwnBlocks extends JavaPlugin{
 		if (activatedPlayers.contains(name))
 		{
 			activatedPlayers.remove(name);
-			if (statusMessage == StatusMessage.ENABLED)
+			if (statusMessage == StatusMessage.ENABLE)
 				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
 			if (statusMessage == StatusMessage.SIMPLE)
-				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + ": OwnBlocks deactivated");
+				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + "OwnBlocks deactivated");
 		}
 	}
 	
@@ -231,7 +235,13 @@ public class OwnBlocks extends JavaPlugin{
 						"\nsave-interval=60" + 
 						"\n\n#Id of material that when used will display the owner of a placed block." +
 						"\n#default value is 269, which is a wooden shovel" +
-						"\ninfo-id=269");
+						"\ninfo-id=269" +
+						"\n\n#Id of material that when used will add block to the database to be protected" +
+						"\n#default value is 268, which is a wooden sword" +
+						"\nadd-id=268" +
+						"\n\n#Set whether OwnBlocks is activated on player login (enabled by default) or if" +
+						"\n#players must enable OwnBlocks themselves (disabled by default)" +
+						"\nenabled-on-login=true");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -280,21 +290,24 @@ public class OwnBlocks extends JavaPlugin{
 		else
 			useiConomy = false;
 		
+		//get debug
 		str = properties.getProperty("debug");
 		if (str != null && str.equalsIgnoreCase("true"))
 			debug = true;
 		
+		//get status-message
 		str = properties.getProperty("status-message");
 		if (str != null)
 		{
-			if (str.equalsIgnoreCase("enabled"))
-				statusMessage = StatusMessage.ENABLED;
-			else if (str.equalsIgnoreCase("disabled"))
-				statusMessage = StatusMessage.DISABLED;
+			if (str.equalsIgnoreCase("enable"))
+				statusMessage = StatusMessage.ENABLE;
+			else if (str.equalsIgnoreCase("disable"))
+				statusMessage = StatusMessage.DISABLE;
 			else if (str.equalsIgnoreCase("simple"))
 				statusMessage = StatusMessage.SIMPLE;
 		}
 		
+		//get save-interval
 		str = properties.getProperty("save-interval");
 		if (str != null)
 		{
@@ -310,6 +323,7 @@ public class OwnBlocks extends JavaPlugin{
 			}
 		}
 		
+		//get info tool ID
 		str = properties.getProperty("info-id");
 		if (str != null)
 		{
@@ -319,6 +333,26 @@ public class OwnBlocks extends JavaPlugin{
 			{
 				log.severe("[OwnBlocks] info-id not a number.  Defaulting to 269.");
 			}
+		}
+		
+		//get add tool ID
+		str = properties.getProperty("add-id");
+		if (str != null)
+		{
+			try{
+				addID = Integer.parseInt(str);
+			}catch (NumberFormatException e)
+			{
+				log.severe("[OwnBlocks] info-id not a number.  Defaulting to 269.");
+			}
+		}
+		
+		//get enabled-on-login
+		str = properties.getProperty("enabled-on-login");
+		if (str != null)
+		{
+			if (str.equalsIgnoreCase("false"))
+				enabledOnLogin = false;
 		}
 		
 	}
@@ -370,13 +404,15 @@ public class OwnBlocks extends JavaPlugin{
 	{
 		boolean bool = true;
 		try {
-			//removeAllPlayers();
-			fos = new FileOutputStream(file);
+			fos = new FileOutputStream(tmpDatabaseFile);
 			obo = new ObjectOutputStream(fos);
 			obo.writeObject(database);
 			obo.close();
 			fos.close();
-			debugMessage("Wrote database to file");
+			debugMessage("Wrote database to tmp file");
+			file.delete();
+			tmpDatabaseFile.renameTo(file);
+			debugMessage("Deleted original database and renamed tmp");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			bool = false;
@@ -395,6 +431,11 @@ public class OwnBlocks extends JavaPlugin{
 		return infoID;
 	}
 	
+	public int getAddID()
+	{
+		return addID;
+	}
+	
 	public boolean hasPermission(Player p, String node)
 	{
 		if (permissions != null)
@@ -403,6 +444,9 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		else
 		{
+			if (node.equals("OwnBlocks.use"))
+				return true;					//Default to all players able to protect blocks
+			
 			return p.isOp();
 		}
 	}
@@ -410,6 +454,11 @@ public class OwnBlocks extends JavaPlugin{
 	public boolean hasPermission(String player, String node)
 	{
 		return hasPermission(getServer().getPlayer(player), node);
+	}
+	
+	public boolean getEnabledOnLogin()
+	{
+		return enabledOnLogin;
 	}
 	
 	
