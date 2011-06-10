@@ -82,9 +82,11 @@ public class OwnBlocksBlockListener extends BlockListener{
 				}
 				else
 				{
-					OBBlock obb = new OBBlock(e.getBlockPlaced());
-					database.put(obb, e.getPlayer().getName());
-					debugMessage("Block placed - not with iConomy");
+					//OBBlock obb = new OBBlock(e.getBlockPlaced());
+					//database.put(obb, e.getPlayer().getName());
+				    String player = e.getPlayer().getName();
+					MysqlBlock mb = new MysqlBlock(e.getBlockPlaced(), player, null, null);
+				    debugMessage("Block placed - not with iConomy");
 				}
 			}
 		}

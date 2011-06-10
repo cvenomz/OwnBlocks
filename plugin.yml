@@ -1,6 +1,6 @@
-name: OwnBlocks
+name: OwnBlocksMySQL
 main: me.cvenomz.OwnBlocks.OwnBlocks
-version: 10.0
+version: 0.1
 author: cvenomz
 commands:
   ownblocks:

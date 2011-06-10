@@ -58,7 +58,7 @@ public class OwnBlocks extends JavaPlugin{
 	private int infoID = 269;
 	private int addID = 268;
 	private boolean enabledOnLogin = true;
-	private double version = 10.0;
+	private double version = 0.1;
 	
 	@Override
 	public void onDisable() {
@@ -312,7 +312,7 @@ public class OwnBlocks extends JavaPlugin{
 		if (str != null)
 		{
 			saveDatabaseRef = new SaveDatabase(this);
-			long interval = 60*20L;
+			long interval = 60*20L;  //20 ticks per second
 			try{
 				interval = 20*Long.parseLong(str);
 			}catch (NumberFormatException e) {log.severe("[OwnBlocks] save-interval not a number, defaulting to 60s");}
