@@ -38,16 +38,16 @@ public class OwnBlocks extends JavaPlugin{
 	public String mainDirectory = "plugins" + File.separator + "OwnBlocksMySQL";
 	public Logger log = Logger.getLogger("Minecraft");
 	//private File databaseFile = new File(mainDirectory + File.separator + "");
-	public Map<OBBlock, String> database;
+	//public Map<OBBlock, String> database;
 	public ArrayList<String> activatedPlayers;
 	public Properties properties; 
 	public ArrayList<Integer> exclude;
-	private FileInputStream fis;
-	private FileOutputStream fos;
-	private ObjectInputStream obi;
-	private ObjectOutputStream obo;
-	private File file;
-	private File tmpDatabaseFile;
+	//private FileInputStream fis;
+	//private FileOutputStream fos;
+	//private ObjectInputStream obi;
+	//private ObjectOutputStream obo;
+	//private File file;
+	//private File tmpDatabaseFile;
 	private File propertiesFile;
 	private boolean useiConomy;
 	private int iConomyRate;
@@ -57,14 +57,14 @@ public class OwnBlocks extends JavaPlugin{
 	public iConomy iConomy;
 	public boolean debug = false;
 	public StatusMessage statusMessage = StatusMessage.ENABLE;
-	private SaveDatabase saveDatabaseRef;
+	//private SaveDatabase saveDatabaseRef;
 	private int infoID = 269;
 	private int addID = 268;
 	private boolean enabledOnLogin = true;
 	private boolean useMySQL = false;
 	private MysqlDatabase mysqlDatabase;
 	private String host,databaseName,username,password;
-	private double version = 0.1;
+	private double version = 0.2;
 	
 	@Override
 	public void onDisable() {
@@ -72,7 +72,7 @@ public class OwnBlocks extends JavaPlugin{
 		if (!useMySQL)
 		{
 		    log.info("[OwnBlocks] Going to try to write database to file...");
-		    writeDatabaseToFile();
+		    //writeDatabaseToFile();
 		}
 		else
 		{
@@ -106,10 +106,10 @@ public class OwnBlocks extends JavaPlugin{
         
         log.info("useMySQL = " + useMySQL);
         
-        if (useMySQL)
+        //if (useMySQL)
             yesMysqlEnable();
-        else
-            noMysqlEnable();
+        //else
+        //    noMysqlEnable();
 	}
 	
 	private void yesMysqlEnable()
@@ -146,7 +146,7 @@ public class OwnBlocks extends JavaPlugin{
     
 	}
 	
-	private void noMysqlEnable()
+	/*private void noMysqlEnable()
 	{
 	    try {
             file = new File(mainDirectory + File.separator + "Database.db");
@@ -189,7 +189,7 @@ public class OwnBlocks extends JavaPlugin{
         setupPermissions();
         log.info("[OwnBlocks] version " + version + " initialized");
     
-	}
+	}*/
 	
 	private void addCurrentPlayers()
 	{
@@ -371,7 +371,7 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		
 		//get save-interval
-		str = properties.getProperty("save-interval");
+		/*str = properties.getProperty("save-interval");
 		if (str != null)
 		{
 			saveDatabaseRef = new SaveDatabase(this);
@@ -384,7 +384,7 @@ public class OwnBlocks extends JavaPlugin{
 				int code = getServer().getScheduler().scheduleSyncRepeatingTask(this, saveDatabaseRef, interval, interval);
 				//log.info("Code: "+code); //debug
 			}
-		}
+		}*/
 		
 		//get info tool ID
 		str = properties.getProperty("info-id");
@@ -477,7 +477,7 @@ public class OwnBlocks extends JavaPlugin{
 			log.info("[OwnBlocks] " + str);
 	}
 	
-	public boolean writeDatabaseToFile()
+	/*public boolean writeDatabaseToFile()
 	{
 	    if (useMySQL)
 	        return true;
@@ -503,7 +503,7 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		
 		return bool;
-	}
+	}*/
 	
 	public int getInfoID()
 	{
