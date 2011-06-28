@@ -16,6 +16,7 @@ public class MysqlTest {
             db.CheckOBTable();
             db.addBlock(mb);
             db.closeConnection();
+            System.out.println("connection closed");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

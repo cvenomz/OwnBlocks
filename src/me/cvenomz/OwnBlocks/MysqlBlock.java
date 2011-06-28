@@ -24,14 +24,14 @@ public class MysqlBlock {
         this.tag = tag;
     }
     
-    public MysqlBlock(Block b, String owner, ArrayList<String> allowed, String tag)
+    public MysqlBlock(Block b, String owner, String allowed, String tag)
     {
         x = b.getX();
         y = b.getY();
         z = b.getZ();
         this.world = b.getWorld().getName();
         this.owner = owner;
-        this.allowed = allowed;
+        this.allowed = parseAllowed(allowed);
         this.tag = tag;
     }
     
@@ -54,10 +54,10 @@ public class MysqlBlock {
         return x+y+z;
     }
     
-    public String toString()
+    /*public String toString()
     {
         return world + " : ("+x+","+y+","+z+") owned by " + owner;
-    }
+    }*/
     
     private ArrayList<String> parseAllowed(String str)
     {
@@ -68,11 +68,11 @@ public class MysqlBlock {
         ArrayList<String> ret = new ArrayList<String>();
         for (int i=0; i<tokens.length;i++)
         {
-            System.out.println(i+" - "+tokens[i]);
+            //System.out.println(i+" - "+tokens[i]);
             if (!tokens[i].equals(""))
                 ret.add(tokens[i]);
         }
-        System.out.println(tokens.length+" , "+ret);
+        //System.out.println(tokens.length+" , "+ret);
         return ret;
     }
     
@@ -107,5 +107,11 @@ public class MysqlBlock {
                         tag+
                         "')";
         return value;
+    }
+    
+    public String toString()
+    {
+        String str =    "(" + x + "," + y + "," + z + ")";
+        return str;
     }
 }

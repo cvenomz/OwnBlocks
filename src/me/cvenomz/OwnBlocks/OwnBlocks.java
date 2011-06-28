@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.block.BlockListener;
+import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +35,7 @@ public class OwnBlocks extends JavaPlugin{
 	
 	public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
 
-	public String mainDirectory = "plugins" + File.separator + "OwnBlocks";
+	public String mainDirectory = "plugins" + File.separator + "OwnBlocksMySQL";
 	public Logger log = Logger.getLogger("Minecraft");
 	//private File databaseFile = new File(mainDirectory + File.separator + "");
 	public Map<OBBlock, String> database;
@@ -48,8 +51,8 @@ public class OwnBlocks extends JavaPlugin{
 	private File propertiesFile;
 	private boolean useiConomy;
 	private int iConomyRate;
-	private OwnBlocksBlockListener blockListener;
-	private OwnBlocksPlayerListener playerListener;
+	private BlockListener blockListener;
+	private PlayerListener playerListener;
 	private PermissionHandler permissions;
 	public iConomy iConomy;
 	public boolean debug = false;
@@ -58,80 +61,134 @@ public class OwnBlocks extends JavaPlugin{
 	private int infoID = 269;
 	private int addID = 268;
 	private boolean enabledOnLogin = true;
+	private boolean useMySQL = false;
+	private MysqlDatabase mysqlDatabase;
+	private String host,databaseName,username,password;
 	private double version = 0.1;
 	
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
-		log.info("[OwnBlocks] Going to try to write database to file...");
-		writeDatabaseToFile();
-		
+		if (!useMySQL)
+		{
+		    log.info("[OwnBlocks] Going to try to write database to file...");
+		    writeDatabaseToFile();
+		}
+		else
+		{
+            try {
+                mysqlDatabase.closeConnection();
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                log.severe("[OwnBlocks] Could not close database connection properly");
+                e.printStackTrace();
+            }
+		}
 		
 	}
 
 	@Override
 	public void onEnable() {
-		// TODO Auto-generated method stub
-		new File(mainDirectory).mkdirs();
-		
-		try {
-				file = new File(mainDirectory + File.separator + "Database.db");
-				tmpDatabaseFile = new File(mainDirectory + File.separator + "Database_tmp.db");
-				if (file.exists())
-				{
-					fis = new FileInputStream(file);
-					obi = new ObjectInputStream(fis);
-					database = (Map<OBBlock, String>) obi.readObject();
-					log.info("[OwnBlocks] Database read in from file");
-					fis.close();
-					obi.close();
-				}
-				else
-				{
-					log.info("[OwnBlocks] Database does not exist.  Creating initial database...");
-					database = new HashMap<OBBlock, String>();
-				}
-		} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
-		
-		if (database != null)
-		{
-			properties = new Properties();
-			propertiesFile = new File(mainDirectory + File.separator + "OwnBlocks.properties");
-			try {
-				if (!propertiesFile.exists())
-					createExamplePropertiesFile();
-				properties.load(new FileInputStream(propertiesFile));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.severe("[OwnBlocks] Could not create or read properties file");
-					e.printStackTrace();
-			}
-			exclude = new ArrayList<Integer>();
-			readProperties();
-			if (activatedPlayers == null)	//will be null if starting up, but not for a reload?
-			{
-				activatedPlayers = new ArrayList<String>();
-				//addCurrentPlayers();  Disabled adding players onEnable()
-			}
-			blockListener = new OwnBlocksBlockListener(this);
-			playerListener = new OwnBlocksPlayerListener(this);
-			PluginManager pm = getServer().getPluginManager();
-			pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Event.Priority.Normal, this);
-			pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
-			pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
-			pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
-			pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Normal, this);
-			setupPermissions();
-			log.info("[OwnBlocks] version " + version + " initialized");
-		}
-		
+	    new File(mainDirectory).mkdirs();
+	    properties = new Properties();
+        propertiesFile = new File(mainDirectory + File.separator + "OwnBlocks.properties");
+        try {
+            if (!propertiesFile.exists())
+                createExamplePropertiesFile();
+            properties.load(new FileInputStream(propertiesFile));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            log.severe("[OwnBlocks] Could not create or read properties file");
+            e.printStackTrace();
+        }
+        exclude = new ArrayList<Integer>();
+        readProperties();
+        
+        log.info("useMySQL = " + useMySQL);
+        
+        if (useMySQL)
+            yesMysqlEnable();
+        else
+            noMysqlEnable();
+	}
+	
+	private void yesMysqlEnable()
+	{
+        if (activatedPlayers == null)   //will be null if starting up, but not for a reload?
+        {
+            activatedPlayers = new ArrayList<String>();
+            //addCurrentPlayers();  Disabled adding players onEnable()
+        }
+        
+        //TODO: using MySQL, so we dont need database saving
+        
+        
+        mysqlDatabase = new MysqlDatabase(this, host, databaseName, username, password);
+        try {
+            mysqlDatabase.establishConnection();
+            mysqlDatabase.CheckOBTable();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            log.severe("[OwnBlocks] Cant initialize MySQL");
+            e.printStackTrace();
+        }
+        
+        blockListener = new MysqlBlockListener(this);
+        playerListener = new MysqlPlayerListener(this);
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Normal, this);
+        setupPermissions();
+        log.info("[OwnBlocks] version " + version + " initialized with MySQL");
+    
+	}
+	
+	private void noMysqlEnable()
+	{
+	    try {
+            file = new File(mainDirectory + File.separator + "Database.db");
+            tmpDatabaseFile = new File(mainDirectory + File.separator + "Database_tmp.db");
+            if (file.exists())
+            {
+                fis = new FileInputStream(file);
+                obi = new ObjectInputStream(fis);
+                database = (Map<OBBlock, String>) obi.readObject();
+                log.info("[OwnBlocks] Database read in from file");
+                fis.close();
+                obi.close();
+            }
+            else
+            {
+                log.info("[OwnBlocks] Database does not exist.  Creating initial database...");
+                database = new HashMap<OBBlock, String>();
+            }
+	        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+	        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	    
+        if (activatedPlayers == null)   //will be null if starting up, but not for a reload?
+        {
+            activatedPlayers = new ArrayList<String>();
+            //addCurrentPlayers();  Disabled adding players onEnable()
+        }
+        blockListener = new OwnBlocksBlockListener(this);
+        playerListener = new OwnBlocksPlayerListener(this);
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Normal, this);
+        setupPermissions();
+        log.info("[OwnBlocks] version " + version + " initialized");
+    
 	}
 	
 	private void addCurrentPlayers()
@@ -241,7 +298,13 @@ public class OwnBlocks extends JavaPlugin{
 						"\nadd-id=268" +
 						"\n\n#Set whether OwnBlocks is activated on player login (enabled by default) or if" +
 						"\n#players must enable OwnBlocks themselves (disabled by default)" +
-						"\nenabled-on-login=true");
+						"\nenabled-on-login=true" +
+						"\n\n\n#MySQL CONFIG" +
+						"\nuseMySQL=false" +
+						"\nhost=localhost" +
+						"\ndatabaseName=db" +
+						"\nusername=user" +
+						"\npassword=password");
 			pw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -355,6 +418,20 @@ public class OwnBlocks extends JavaPlugin{
 				enabledOnLogin = false;
 		}
 		
+		//get MySQL config stuff
+		str = properties.getProperty("useMySQL");
+		if (str != null)
+		{
+		    if (str.equalsIgnoreCase("true"))
+		    {
+		        useMySQL = true;
+		        host = properties.getProperty("host");
+		        databaseName = properties.getProperty("databaseName");
+		        username = properties.getProperty("username");
+		        password = properties.getProperty("password");
+		    }
+		}
+		
 	}
 	
 	private void setupPermissions()
@@ -402,6 +479,8 @@ public class OwnBlocks extends JavaPlugin{
 	
 	public boolean writeDatabaseToFile()
 	{
+	    if (useMySQL)
+	        return true;
 		boolean bool = true;
 		try {
 			fos = new FileOutputStream(tmpDatabaseFile);
@@ -459,6 +538,11 @@ public class OwnBlocks extends JavaPlugin{
 	public boolean getEnabledOnLogin()
 	{
 		return enabledOnLogin;
+	}
+	
+	public MysqlDatabase getMysqlDatabase()
+	{
+	    return mysqlDatabase;
 	}
 	
 	
