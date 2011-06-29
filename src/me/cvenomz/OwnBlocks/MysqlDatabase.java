@@ -87,7 +87,7 @@ public class MysqlDatabase {
         MysqlBlock ret = null;
         try {
             Statement s = conn.createStatement();
-            s.executeQuery("SELECT * FROM "+tableName+" WHERE world="+mb.getWorld()+" AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
+            s.executeQuery("SELECT * FROM "+tableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
             ResultSet rs = s.getResultSet();
             while (rs.next())
             {
@@ -105,7 +105,7 @@ public class MysqlDatabase {
         int ret = -1;
         try {
             Statement s = conn.createStatement();
-            ret = s.executeUpdate("DELETE FROM "+tableName+" WHERE world="+mb.getWorld()+" AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
+            ret = s.executeUpdate("DELETE FROM "+tableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
         }catch (Exception e) {
             pluginRef.log.severe("[OwnBlocks] Failed to delete block.  Probably SQL error");
             e.printStackTrace();

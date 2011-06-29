@@ -64,7 +64,7 @@ public class OwnBlocks extends JavaPlugin{
 	private boolean useMySQL = false;
 	private MysqlDatabase mysqlDatabase;
 	private String host,databaseName,username,password;
-	private double version = 0.2;
+	private String version = "0.2.1";
 	
 	@Override
 	public void onDisable() {
