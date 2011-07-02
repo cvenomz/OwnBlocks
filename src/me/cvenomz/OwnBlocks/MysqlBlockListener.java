@@ -15,15 +15,17 @@ import com.nijiko.coelho.iConomy.system.Account;
 public class MysqlBlockListener extends BlockListener{
     
     private OwnBlocks pluginRef;
+    private ConfigManager config;
     Logger log;
     boolean debug;
     
-    MysqlBlockListener(OwnBlocks ob)
+    MysqlBlockListener(OwnBlocks ob, ConfigManager conf)
     {
         pluginRef = ob;
+        config = conf;
         //database = pluginRef.database;
         log = pluginRef.log;
-        debug = pluginRef.debug;
+        debug = config.isDebug();
     }
     
     public void onBlockBreak(BlockBreakEvent e)
@@ -61,13 +63,13 @@ public class MysqlBlockListener extends BlockListener{
                 //log.info("Stored");
                 
                 //check iConomy
-                if (pluginRef.useiConomy())
+                if (config.useiConomy())
                 {
                     debugMessage("Use iConomy == true");
                     Account account = pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName());
-                    if (account.getBalance() >= pluginRef.getRate())
+                    if (account.getBalance() >= config.getRate())
                     {
-                        account.subtract(pluginRef.getRate());
+                        account.subtract(config.getRate());
                         String player = e.getPlayer().getName();
                         MysqlBlock mb = new MysqlBlock(e.getBlockPlaced(), player, null, null);
                         pluginRef.getMysqlDatabase().addBlock(mb);
@@ -76,7 +78,7 @@ public class MysqlBlockListener extends BlockListener{
                     else
                     {
                         debugMessage("acct. funds insufficient, block not placed");
-                        e.getPlayer().sendMessage(ChatColor.YELLOW + "You dont have enough money to place this block it costs " + pluginRef.getRate() + ", but you only have " + pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName()).getBalance());
+                        e.getPlayer().sendMessage(ChatColor.YELLOW + "You dont have enough money to place this block it costs " + config.getRate() + ", but you only have " + pluginRef.iConomy.getBank().getAccount(e.getPlayer().getName()).getBalance());
                         e.setCancelled(true);
                     }
                 }

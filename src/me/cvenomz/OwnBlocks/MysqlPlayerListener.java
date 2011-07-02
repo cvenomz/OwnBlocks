@@ -11,11 +11,13 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class MysqlPlayerListener extends PlayerListener{
     
     OwnBlocks pluginRef;
+    ConfigManager config;
     //private Map<OBBlock, String> database;
     
-    public MysqlPlayerListener(OwnBlocks ob)
+    public MysqlPlayerListener(OwnBlocks ob, ConfigManager conf)
     {
         pluginRef = ob;
+        config = conf;
         //database = pluginRef.database;
     }
     
@@ -23,7 +25,7 @@ public class MysqlPlayerListener extends PlayerListener{
     public void onPlayerJoin(PlayerJoinEvent event) {
         // TODO Auto-generated method stub
         //super.onPlayerJoin(event);
-        if (pluginRef.getEnabledOnLogin())
+        if (config.getEnabledOnLogin())
         {
             String player = event.getPlayer().getName();
             pluginRef.addPlayer(player);
@@ -57,13 +59,13 @@ public class MysqlPlayerListener extends PlayerListener{
             return;
         
         //Info
-        if (e.getItem().getTypeId() == pluginRef.getInfoID())
+        if (e.getItem().getTypeId() == config.getInfoID())
             if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
                 if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.info"))
                     handleInfo(e);
         
         //Add
-        if (e.getItem().getTypeId() == pluginRef.getAddID())
+        if (e.getItem().getTypeId() == config.getAddID())
             if (e.getAction() == Action.LEFT_CLICK_BLOCK)
                 if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.add"))
                     handleAdd(e);
