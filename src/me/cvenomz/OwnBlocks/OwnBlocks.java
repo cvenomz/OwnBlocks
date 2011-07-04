@@ -16,6 +16,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
+import me.cvenomz.OwnBlocks.ConfigManager.StatusMessage;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -33,7 +35,7 @@ import com.nijiko.coelho.iConomy.iConomy;
 
 public class OwnBlocks extends JavaPlugin{
 	
-	public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
+	//public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
 
 	public String mainDirectory = "plugins" + File.separator + "OwnBlocksMySQL";
 	public Logger log = Logger.getLogger("Minecraft");
@@ -47,8 +49,8 @@ public class OwnBlocks extends JavaPlugin{
 	private PermissionHandler permissions;
 	public iConomy iConomy;
 	//public boolean debug = false;
-	public StatusMessage statusMessage = StatusMessage.ENABLE;
-	private boolean useMySQL = false;
+	//public StatusMessage statusMessage = StatusMessage.ENABLE;
+	//private boolean useMySQL = false;
 	private MysqlDatabase mysqlDatabase;
 	private String host,databaseName,username,password;
 	private String version = "0.1";
@@ -56,7 +58,7 @@ public class OwnBlocks extends JavaPlugin{
 	@Override
 	public void onDisable() {
 		// TODO Auto-generated method stub
-		if (!useMySQL)
+		if (!configManager.useMySQL())
 		{
 		    log.info("[OwnBlocks] Going to try to write database to file...");
 		}
@@ -83,7 +85,7 @@ public class OwnBlocks extends JavaPlugin{
         configManager = new ConfigManager(propertiesFile);
         //readProperties();
         
-        debugMessage("useMySQL = " + useMySQL);
+        debugMessage("useMySQL = " + configManager.useMySQL());
         
         //if (useMySQL)
             yesMysqlEnable();
@@ -141,9 +143,9 @@ public class OwnBlocks extends JavaPlugin{
 			if (!activatedPlayers.contains(name))
 			{
 				activatedPlayers.add(name);
-				if (statusMessage == StatusMessage.ENABLE)
+				if (configManager.getStatusMessage() == StatusMessage.ENABLE)
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
-				else if (statusMessage == StatusMessage.SIMPLE)
+				else if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
 	
 			}
@@ -155,9 +157,9 @@ public class OwnBlocks extends JavaPlugin{
 		if (activatedPlayers.contains(name))
 		{
 			activatedPlayers.remove(name);
-			if (statusMessage == StatusMessage.ENABLE)
+			if (configManager.getStatusMessage() == StatusMessage.ENABLE)
 				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
-			if (statusMessage == StatusMessage.SIMPLE)
+			if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
 				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + "OwnBlocks deactivated");
 		}
 	}

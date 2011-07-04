@@ -13,7 +13,8 @@ public class MysqlDatabase {
     private String password;
     private String host;
     private String databaseName;
-    private String tableName;
+    private String ownBlocksTableName;
+    private String playersTableName;
     private String url;
     private Connection conn;
     
@@ -27,7 +28,8 @@ public class MysqlDatabase {
         this.username = username;
         this.password = password;
         
-        this.tableName = "OwnBlocks";
+        this.ownBlocksTableName = "OwnBlocks";
+        this.playersTableName = "Players";
     }
     
     public void establishConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
@@ -44,7 +46,7 @@ public class MysqlDatabase {
         //pluginRef.debugMessage("Connection close attempt -- done");
     }
     
-    private boolean tableExists()throws Exception
+    private boolean tableExists(String table)throws Exception
     {
         Statement s = conn.createStatement();
         s.executeQuery("SHOW TABLES");
@@ -52,7 +54,7 @@ public class MysqlDatabase {
         boolean ret = false;
         while (rs.next())
         {
-            if (rs.getString(1).equalsIgnoreCase(tableName))
+            if (rs.getString(1).equalsIgnoreCase(table))
                 ret = true;
         }
         return ret;
@@ -61,7 +63,7 @@ public class MysqlDatabase {
     public void CheckOBTable()throws Exception
     {
         Statement s = conn.createStatement();
-        if (!tableExists())
+        if (!tableExists("OwnBlocks"))
             s.executeUpdate("CREATE TABLE OwnBlocks (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), world varchar(50), x INT NOT NULL, y INT NOT NULL, z INT NOT NULL, owner varchar(50) NOT NULL, allowed TEXT, tag varchar(50), time TIMESTAMP )");
     }
     
@@ -73,7 +75,7 @@ public class MysqlDatabase {
                 deleteBlock(mb);        //delete the block to prevent duplicates
         Statement s = conn.createStatement();
         String value = mb.toSQLString();
-        ret = s.executeUpdate("INSERT INTO "+tableName+" (world, x, y, z, owner, allowed, tag) VALUES " + value);
+        ret = s.executeUpdate("INSERT INTO "+ownBlocksTableName+" (world, x, y, z, owner, allowed, tag) VALUES " + value);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             pluginRef.log.severe("[OwnBlocks] Failed to add block.  Probably SQL error");
@@ -87,7 +89,7 @@ public class MysqlDatabase {
         MysqlBlock ret = null;
         try {
             Statement s = conn.createStatement();
-            s.executeQuery("SELECT * FROM "+tableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
+            s.executeQuery("SELECT * FROM "+ownBlocksTableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
             ResultSet rs = s.getResultSet();
             while (rs.next())
             {
@@ -105,12 +107,33 @@ public class MysqlDatabase {
         int ret = -1;
         try {
             Statement s = conn.createStatement();
-            ret = s.executeUpdate("DELETE FROM "+tableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
+            ret = s.executeUpdate("DELETE FROM "+ownBlocksTableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
         }catch (Exception e) {
             pluginRef.log.severe("[OwnBlocks] Failed to delete block.  Probably SQL error");
             e.printStackTrace();
         }
         return ret;
+    }
+    
+    public void CheckPlayersTable()throws Exception
+    {
+        Statement s = conn.createStatement();
+        if (!tableExists("Players"))
+            s.executeUpdate("CREATE TABLE Players (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), name varchar(50), activated TINYINT)");
+    }
+    
+    public ResultSet getPlayer(String playerName)
+    {
+    	ResultSet rs = null;
+		try {
+			Statement s = conn.createStatement();
+	    	s.executeQuery("SELECT * FROM "+playersTableName+" WHERE name='"+playerName+"'");
+	    	rs = s.getResultSet();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return rs;
     }
     
     

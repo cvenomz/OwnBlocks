@@ -46,6 +46,8 @@ public class ConfigManager {
 	public boolean useiConomy() {return useiConomy;}
 	public int getRate() {return iConomyRate;}
 	public boolean isDebug() {return debug;}
+	public StatusMessage getStatusMessage() {return statusMessage;}
+	public boolean useMySQL() {return useMySQL;}
 	
 	public void initialize()
 	{
