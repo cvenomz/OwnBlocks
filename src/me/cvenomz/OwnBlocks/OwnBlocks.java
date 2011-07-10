@@ -1,19 +1,9 @@
 package me.cvenomz.OwnBlocks;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import me.cvenomz.OwnBlocks.ConfigManager.StatusMessage;
@@ -23,21 +13,24 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.Event.Priority;
+import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.iConomy.iConomy;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-import com.nijiko.coelho.iConomy.iConomy;
 
 public class OwnBlocks extends JavaPlugin{
 	
 	//public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
 
-	public String mainDirectory = "plugins" + File.separator + "OwnBlocksMySQL";
+	public String mainDirectory = "plugins" + File.separator + "OwnBlocksX";
 	public Logger log = Logger.getLogger("Minecraft");
 	public ArrayList<String> activatedPlayers;
 	public Properties properties; 
@@ -46,6 +39,7 @@ public class OwnBlocks extends JavaPlugin{
 	private ConfigManager configManager;
 	private BlockListener blockListener;
 	private PlayerListener playerListener;
+	private ServerListener serverListener;
 	private PermissionHandler permissions;
 	public iConomy iConomy;
 	//public boolean debug = false;
@@ -60,7 +54,7 @@ public class OwnBlocks extends JavaPlugin{
 		// TODO Auto-generated method stub
 		if (!configManager.useMySQL())
 		{
-		    log.info("[OwnBlocks] Going to try to write database to file...");
+		    log.info("[OwnBlocksX] Going to try to write database to file...");
 		}
 		else
 		{
@@ -68,7 +62,7 @@ public class OwnBlocks extends JavaPlugin{
                 mysqlDatabase.closeConnection();
             } catch (SQLException e) {
                 // TODO Auto-generated catch block
-                log.severe("[OwnBlocks] Could not close database connection properly");
+                log.severe("[OwnBlocksX] Could not close database connection properly");
                 e.printStackTrace();
             }
 		}
@@ -79,10 +73,11 @@ public class OwnBlocks extends JavaPlugin{
 	public void onEnable() {
 	    new File(mainDirectory).mkdirs();
 	    properties = new Properties();
-        propertiesFile = new File(mainDirectory + File.separator + "OwnBlocks.properties");
+        propertiesFile = new File(mainDirectory + File.separator + "OwnBlocksX.properties");
         
         exclude = new ArrayList<Integer>();
         configManager = new ConfigManager(propertiesFile);
+        configManager.initialize();
         //readProperties();
         
         debugMessage("useMySQL = " + configManager.useMySQL());
@@ -103,27 +98,33 @@ public class OwnBlocks extends JavaPlugin{
         
         //TODO: using MySQL, so we dont need database saving
         
-        
+        host = configManager.getHost();
+        databaseName = configManager.getDatabaseName();
+        username = configManager.getUsername();
+        password = configManager.getPassword();
         mysqlDatabase = new MysqlDatabase(this, host, databaseName, username, password);
         try {
             mysqlDatabase.establishConnection();
             mysqlDatabase.CheckOBTable();
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            log.severe("[OwnBlocks] Cant initialize MySQL");
+            log.severe("[OwnBlocksX] Cant initialize MySQL");
             e.printStackTrace();
         }
         
         blockListener = new MysqlBlockListener(this, configManager);
         playerListener = new MysqlPlayerListener(this, configManager);
+        serverListener = new OBServerListener(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Event.Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Event.Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Event.Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Event.Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
+        pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
         setupPermissions();
-        log.info("[OwnBlocks] version " + version + " initialized with MySQL");
+        log.info("[OwnBlocksX] version " + version + " initialized with MySQL");
     
 	}
 		
@@ -184,7 +185,7 @@ public class OwnBlocks extends JavaPlugin{
 		Player p = (Player)sender;
 		String player = p.getName();
 		//log.info("\""+player+"\"");
-		if (commandName.equalsIgnoreCase("ownblocks") || commandName.equalsIgnoreCase("ob"))
+		if (commandName.equalsIgnoreCase("ownblocksx") || commandName.equalsIgnoreCase("obx"))
 		{
 			togglePlayer(player);
 			return true;
@@ -208,7 +209,7 @@ public class OwnBlocks extends JavaPlugin{
 	public void debugMessage(String str)
 	{
 		if (configManager.isDebug())
-			log.info("[OwnBlocks] " + str);
+			log.info("[OwnBlocksX] " + str);
 	}
 	
 	public boolean hasPermission(Player p, String node)
@@ -219,7 +220,7 @@ public class OwnBlocks extends JavaPlugin{
 		}
 		else
 		{
-			if (node.equals("OwnBlocks.use"))
+			if (node.equals("OwnBlocksX.use"))
 				return true;					//Default to all players able to protect blocks
 			
 			return p.isOp();

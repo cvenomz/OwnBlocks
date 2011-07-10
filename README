@@ -2,7 +2,7 @@ This plugin remembers all the blocks that you place, and wont let
 any other player directly remove those plocks.  However, they may
 remove them with fire, lava, tnt, creepers, etc.
 
-If OwnBlocks does not find the config file ('plugins/OwnBlocks/OwnBlocks.properties')
+If OwnBlocksX does not find the config file ('plugins/OwnBlocksX/OwnBlocksX.properties')
 then the latest example, or default, config file will be created with the correct name.
 This means that you may back and move up your current config file, then restart your server
 to get the latest default config file with descriptions of all the available settings. 

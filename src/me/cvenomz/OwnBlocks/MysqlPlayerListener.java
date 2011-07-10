@@ -61,13 +61,13 @@ public class MysqlPlayerListener extends PlayerListener{
         //Info
         if (e.getItem().getTypeId() == config.getInfoID())
             if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
-                if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.info"))
+                if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocksX.info"))
                     handleInfo(e);
         
         //Add
         if (e.getItem().getTypeId() == config.getAddID())
             if (e.getAction() == Action.LEFT_CLICK_BLOCK)
-                if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.add"))
+                if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocksX.add"))
                     handleAdd(e);
         
     }

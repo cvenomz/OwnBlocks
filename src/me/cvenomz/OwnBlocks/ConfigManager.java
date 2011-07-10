@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
@@ -14,11 +15,11 @@ public class ConfigManager {
 	public enum StatusMessage{ENABLE,DISABLE,SIMPLE}
 	
 	private File propertiesFile;
-	private Properties properties;
+	private Properties properties = new Properties();
 	private Logger log;
 	
 	//variables
-	private ArrayList<Integer> exclude;
+	private ArrayList<Integer> exclude = new ArrayList<Integer>();
 	private boolean useiConomy;
 	private int iConomyRate;
 	private boolean debug;
@@ -48,6 +49,10 @@ public class ConfigManager {
 	public boolean isDebug() {return debug;}
 	public StatusMessage getStatusMessage() {return statusMessage;}
 	public boolean useMySQL() {return useMySQL;}
+	public String getHost() {return host;}
+	public String getDatabaseName() {return databaseName;}
+	public String getUsername() {return username;}
+	public String getPassword() {return password;}
 	
 	public void initialize()
 	{
@@ -57,7 +62,7 @@ public class ConfigManager {
             properties.load(new FileInputStream(propertiesFile));
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            log.severe("[OwnBlocks] Could not create or read properties file");
+            log.severe("[OwnBlocksX] Could not create or read properties file");
             e.printStackTrace();
         }
 		readProperties();
@@ -69,19 +74,21 @@ public class ConfigManager {
 			propertiesFile.createNewFile();
 			PrintWriter pw = new PrintWriter(propertiesFile);
 			pw.println("#OwnBlocks Properties File");
-			pw.println("\n#to exclude certain items from being protected when a player places them" +
-						"\n#regarldess of if they have OwnBlocks activated, enter the ID of the item" +
-						"\n#after the exclude key (comma separated; no spaces)" +
-						"\n#The example below would exclude Dirt(03) and Sand(12) from being added to the database" +
-						"\n#\n#exclude=03,12" +
+			pw.println( "\n#MySQL CONFIG" +
+                        "\nhost=localhost" +
+                        "\ndatabaseName=db" +
+                        "\nusername=user" +
+                        "\npassword=password" +
+                        "\n\n\\n#Exclude certain items from being added to the database when a player places them." +
+						"\n#Please note this does not retro-actively affect the database. (comma separated; no spaces)" +
+						"\n#This default excludes Dirt(03), Sand(12), and Saplings(06) from being added to the database" +
+						"\nexclude=03,12,06" +
 						"\n" +
-						"\n#Please Note: changes are not retro-active. In this example, dirt placed before being excluded" +
-						"\n#Would still be protected, even after it is added to the 'exclude list'" +
 						"\n\n#To charge players a basic rate to their iConomy accounts, enter the amount (Integer)" +
 						"\n#that you wish to charge them per block they protect. Values <= 0 disable iConomy" +
 						"\niConomy=0" +
-						"\n\n#Uncomment to enable debug mode" + 
-						"\n#debug=true" + 
+						"\n\n#Debug mode" + 
+						"\ndebug=false" + 
 						"\n\n#status-message is the message sent to players telling them when OwnBlocks has" +
 						"\n#been activated or deactivated for them. Options are: [enable, disable, simple]" +
 						"\nstatus-message=enable" +
@@ -94,12 +101,7 @@ public class ConfigManager {
 						"\n\n#Set whether OwnBlocks is activated on player login (enabled by default) or if" +
 						"\n#players must enable OwnBlocks themselves (disabled by default)" +
 						"\nenabled-on-login=true" +
-						"\n\n\n#MySQL CONFIG" +
-						"\nuseMySQL=false" +
-						"\nhost=localhost" +
-						"\ndatabaseName=db" +
-						"\nusername=user" +
-						"\npassword=password");
+						"\n");
 			pw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -119,7 +121,7 @@ public class ConfigManager {
 				try {
 				exclude.add(Integer.parseInt(st.nextToken()));
 				}catch (NumberFormatException e)
-				{log.severe("[OwnBlocks] Error reading exclude IDs -- Not an Integer");}
+				{log.severe("[OwnBlocksX] Error reading exclude IDs -- Not an Integer");}
 			}
 		}
 		
@@ -134,13 +136,13 @@ public class ConfigManager {
 				{
 					useiConomy = true;
 					iConomyRate = tmp;
-					log.info("[OwnBlocks] iConomy support activated. Rate=" + iConomyRate);
+					log.info("[OwnBlocksX] iConomy support activated. Rate=" + iConomyRate);
 				}
 				else
 					useiConomy = false;
 			} catch (NumberFormatException e)
 			{
-				log.severe("[OwnBlocks] iConomy support cannot be activated. The rate is not a proper number");
+				log.severe("[OwnBlocksX] iConomy support cannot be activated. The rate is not a proper number");
 				useiConomy = false;
 			}
 		}
@@ -176,7 +178,7 @@ public class ConfigManager {
 				infoID = Integer.parseInt(str);
 			}catch (NumberFormatException e)
 			{
-				log.severe("[OwnBlocks] info-id not a number.  Defaulting to 269.");
+				log.severe("[OwnBlocksX] info-id not a number.  Defaulting to 269.");
 			}
 		}
 		
@@ -190,7 +192,7 @@ public class ConfigManager {
 				addID = Integer.parseInt(str);
 			}catch (NumberFormatException e)
 			{
-				log.severe("[OwnBlocks] add-id not a number.  Defaulting to 268.");
+				log.severe("[OwnBlocksX] add-id not a number.  Defaulting to 268.");
 			}
 		}
 		
@@ -203,18 +205,11 @@ public class ConfigManager {
 		}
 		
 		//get MySQL config stuff
-		str = properties.getProperty("useMySQL");
-		if (str != null)
-		{
-		    if (str.equalsIgnoreCase("true"))
-		    {
-		        useMySQL = true;
-		        host = properties.getProperty("host");
-		        databaseName = properties.getProperty("databaseName");
-		        username = properties.getProperty("username");
-		        password = properties.getProperty("password");
-		    }
-		}
+        useMySQL = true;
+        host = properties.getProperty("host");
+        databaseName = properties.getProperty("databaseName");
+        username = properties.getProperty("username");
+        password = properties.getProperty("password");
 		
 	}
 }

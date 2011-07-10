@@ -28,13 +28,14 @@ public class MysqlDatabase {
         this.username = username;
         this.password = password;
         
-        this.ownBlocksTableName = "OwnBlocks";
+        this.ownBlocksTableName = "OwnBlocksX";
         this.playersTableName = "Players";
     }
     
     public void establishConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
     {
         url = "jdbc:mysql://"+host+"/"+databaseName;
+        pluginRef.debugMessage(url);
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         conn = DriverManager.getConnection(url, username, password);
         //pluginRef.debugMessage("Connection attempt to database -- done");
@@ -63,8 +64,8 @@ public class MysqlDatabase {
     public void CheckOBTable()throws Exception
     {
         Statement s = conn.createStatement();
-        if (!tableExists("OwnBlocks"))
-            s.executeUpdate("CREATE TABLE OwnBlocks (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), world varchar(50), x INT NOT NULL, y INT NOT NULL, z INT NOT NULL, owner varchar(50) NOT NULL, allowed TEXT, tag varchar(50), time TIMESTAMP )");
+        if (!tableExists("OwnBlocksX"))
+            s.executeUpdate("CREATE TABLE " + ownBlocksTableName + " (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), world varchar(50), x INT NOT NULL, y INT NOT NULL, z INT NOT NULL, owner varchar(50) NOT NULL, allowed TEXT, tag varchar(50), time TIMESTAMP )");
     }
     
     public int addBlock(MysqlBlock mb)
@@ -78,7 +79,7 @@ public class MysqlDatabase {
         ret = s.executeUpdate("INSERT INTO "+ownBlocksTableName+" (world, x, y, z, owner, allowed, tag) VALUES " + value);
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            pluginRef.log.severe("[OwnBlocks] Failed to add block.  Probably SQL error");
+            pluginRef.log.severe("[OwnBlocksX] Failed to add block.  Probably SQL error");
             e.printStackTrace();
         }        
         return ret;
@@ -96,7 +97,7 @@ public class MysqlDatabase {
                 ret = new MysqlBlock(rs.getString("world"), rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getString("owner"), rs.getString("allowed"), rs.getString("tag"), rs.getTime("time"));
             }
         }catch (Exception e) {
-            pluginRef.log.severe("[OwnBlocks] Failed to get block.  Probably SQL error");
+            pluginRef.log.severe("[OwnBlocksX] Failed to get block.  Probably SQL error");
             e.printStackTrace();
         }
         return ret;
@@ -109,7 +110,7 @@ public class MysqlDatabase {
             Statement s = conn.createStatement();
             ret = s.executeUpdate("DELETE FROM "+ownBlocksTableName+" WHERE world='"+mb.getWorld()+"' AND x="+mb.getX()+" AND y="+mb.getY()+" AND z="+mb.getZ());
         }catch (Exception e) {
-            pluginRef.log.severe("[OwnBlocks] Failed to delete block.  Probably SQL error");
+            pluginRef.log.severe("[OwnBlocksX] Failed to delete block.  Probably SQL error");
             e.printStackTrace();
         }
         return ret;
@@ -119,7 +120,7 @@ public class MysqlDatabase {
     {
         Statement s = conn.createStatement();
         if (!tableExists("Players"))
-            s.executeUpdate("CREATE TABLE Players (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), name varchar(50), activated TINYINT)");
+            s.executeUpdate("CREATE TABLE " + playersTableName + " (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), name varchar(50), activated TINYINT)");
     }
     
     public ResultSet getPlayer(String playerName)

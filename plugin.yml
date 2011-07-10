@@ -1,9 +1,9 @@
-name: OwnBlocksMySQL
+name: OwnBlocksX
 main: me.cvenomz.OwnBlocks.OwnBlocks
-version: 0.2.1
+version: 0.1
 author: cvenomz
 commands:
-  ownblocks:
-    aliases: [ob]
-    description: toggle per-player OwnBlocks activation
+  ownblocksx:
+    aliases: [obx]
+    description: toggle per-player OwnBlocksX activation
     usage: /<command>
