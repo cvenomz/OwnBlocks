@@ -47,7 +47,10 @@ public class MysqlBlockListener extends BlockListener{
                 if (pluginRef.hasPermission(e.getPlayer(), "OwnBlocks.ignoreOwnership")) //Is player a mod/OP
                     pluginRef.getMysqlDatabase().deleteBlock(databaseBlock);       //break block
                 else                            //Player is not a mod/OP
+                {
                     e.setCancelled(true);       //dont break block, because they are not an OP, nor are they the owner.
+                    e.getPlayer().sendMessage(ChatColor.YELLOW + databaseBlock.getOwner() + " owns this block");
+                }
             }
             else                                //Player is owner of block
                 pluginRef.getMysqlDatabase().deleteBlock(databaseBlock);           //break block, because they are the owner
