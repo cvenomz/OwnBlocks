@@ -32,7 +32,7 @@ public class OwnBlocks extends JavaPlugin{
 
 	public String mainDirectory = "plugins" + File.separator + "OwnBlocksX";
 	public Logger log = Logger.getLogger("Minecraft");
-	public ArrayList<String> activatedPlayers;
+	//public ArrayList<String> activatedPlayers;
 	public Properties properties; 
 	public ArrayList<Integer> exclude;
 	private File propertiesFile;
@@ -47,7 +47,7 @@ public class OwnBlocks extends JavaPlugin{
 	//private boolean useMySQL = false;
 	private MysqlDatabase mysqlDatabase;
 	private String host,databaseName,username,password;
-	private String version = "0.1.1";
+	private String version = "0.2";
 	
 	@Override
 	public void onDisable() {
@@ -90,11 +90,11 @@ public class OwnBlocks extends JavaPlugin{
 	
 	private void yesMysqlEnable()
 	{
-        if (activatedPlayers == null)   //will be null if starting up, but not for a reload?
+        /*if (activatedPlayers == null)   //will be null if starting up, but not for a reload?
         {
             activatedPlayers = new ArrayList<String>();
             //addCurrentPlayers();  Disabled adding players onEnable()
-        }
+        }*/
         
         //TODO: using MySQL, so we dont need database saving
         
@@ -112,7 +112,7 @@ public class OwnBlocks extends JavaPlugin{
             e.printStackTrace();
         }
         
-        blockListener = new MysqlBlockListener(this, configManager);
+        blockListener = new MysqlBlockListener(this, configManager, mysqlDatabase);
         playerListener = new MysqlPlayerListener(this, configManager);
         serverListener = new OBServerListener(this);
         PluginManager pm = getServer().getPluginManager();
@@ -141,7 +141,7 @@ public class OwnBlocks extends JavaPlugin{
 	{
 		if (hasPermission(name, "OwnBlocks.use"))
 		{
-			if (!activatedPlayers.contains(name))
+			/*if (!activatedPlayers.contains(name))
 			{
 				activatedPlayers.add(name);
 				if (configManager.getStatusMessage() == StatusMessage.ENABLE)
@@ -149,25 +149,41 @@ public class OwnBlocks extends JavaPlugin{
 				else if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
 	
-			}
+			}*/
+		    if (mysqlDatabase.getPlayer(name) == null)
+		        mysqlDatabase.addPlayer(name);
+		    mysqlDatabase.setActivated(name, true);
+		    
+		    if (configManager.getStatusMessage() == StatusMessage.ENABLE)
+                getServer().getPlayer(name).sendMessage(ChatColor.GREEN + name + ": OwnBlocks activated; Blocks you build will be protected");
+            else if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
+                getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
 		}
 	}
 	
 	public void removePlayer(String name)
 	{
-		if (activatedPlayers.contains(name))
+		/*if (activatedPlayers.contains(name))
 		{
 			activatedPlayers.remove(name);
 			if (configManager.getStatusMessage() == StatusMessage.ENABLE)
 				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
 			if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
 				getServer().getPlayer(name).sendMessage(ChatColor.AQUA + "OwnBlocks deactivated");
-		}
+		}*/
+	    if (mysqlDatabase.getPlayer(name) != null)
+	    {
+	        mysqlDatabase.setActivated(name, false);
+	        if (configManager.getStatusMessage() == StatusMessage.ENABLE)
+                getServer().getPlayer(name).sendMessage(ChatColor.AQUA + name + ": OwnBlocks now deactivated");
+            if (configManager.getStatusMessage() == StatusMessage.SIMPLE)
+                getServer().getPlayer(name).sendMessage(ChatColor.AQUA + "OwnBlocks deactivated");
+	    }
 	}
 	
 	private void togglePlayer(String name)
 	{
-		if (activatedPlayers.contains(name))
+		if (mysqlDatabase.isPlayerActivated(name))
 			removePlayer(name);
 		else
 			addPlayer(name);
@@ -179,7 +195,7 @@ public class OwnBlocks extends JavaPlugin{
 		
 		if (!(sender instanceof Player))
 		{
-			log.info("OwnBlocks Activated Players: " + activatedPlayers.toString());
+			//log.info("OwnBlocks Activated Players: " + activatedPlayers.toString());
 			return false;
 		}
 		Player p = (Player)sender;

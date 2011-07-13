@@ -19,13 +19,15 @@ public class MysqlBlockListener extends BlockListener{
     
     private OwnBlocks pluginRef;
     private ConfigManager config;
+    private MysqlDatabase database;
     Logger log;
     boolean debug;
     
-    MysqlBlockListener(OwnBlocks ob, ConfigManager conf)
+    MysqlBlockListener(OwnBlocks ob, ConfigManager conf, MysqlDatabase md)
     {
         pluginRef = ob;
         config = conf;
+        database = md;
         //database = pluginRef.database;
         log = pluginRef.log;
         debug = config.isDebug();
@@ -60,7 +62,7 @@ public class MysqlBlockListener extends BlockListener{
     public void onBlockPlace(BlockPlaceEvent e)
     {
         //Check if player is in the 'active' arraylist
-        if (pluginRef.activatedPlayers.contains(e.getPlayer().getName()))
+        if (database.isPlayerActivated(e.getPlayer().getName()))
         {
             //Check if block ID is excluded
             //log.info(e.getPlayer().getName() + " placing " + e.getBlockPlaced().getTypeId());

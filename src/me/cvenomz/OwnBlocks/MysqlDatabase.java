@@ -35,7 +35,6 @@ public class MysqlDatabase {
     public void establishConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
     {
         url = "jdbc:mysql://"+host+"/"+databaseName;
-        pluginRef.debugMessage(url);
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         conn = DriverManager.getConnection(url, username, password);
         //pluginRef.debugMessage("Connection attempt to database -- done");
@@ -135,6 +134,55 @@ public class MysqlDatabase {
 			e.printStackTrace();
 		}
 		return rs;
+    }
+    
+    public int addPlayer(String player)
+    {
+        int ret = -1;
+        try {
+            if (getPlayer(player) != null)   //check to see if block is already in database for some reason
+                return 0;
+        Statement s = conn.createStatement();
+        String value = "("+player+","+"0)";
+        ret = s.executeUpdate("INSERT INTO "+playersTableName+" (name, activated) VALUES " + value);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            pluginRef.log.severe("[OwnBlocksX] Failed to add player.  Probably SQL error");
+            e.printStackTrace();
+        }        
+        return ret;
+    }
+    
+    public void setActivated(String player, boolean act)
+    {
+        try {
+            Statement s = conn.createStatement();
+            String str;
+            if (act)
+                str = "1";
+            else
+                str = "0";
+            s.executeUpdate("UPDATE " + playersTableName + " SET activated=" + str + " WHERE name='" + player + "'");
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public boolean isPlayerActivated(String player)
+    {
+        ResultSet rs = getPlayer(player);
+        int ret = 0;
+        try {
+            while (rs.next())
+            {
+                ret = rs.getInt("activated");
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return ret == 1;
     }
     
     
