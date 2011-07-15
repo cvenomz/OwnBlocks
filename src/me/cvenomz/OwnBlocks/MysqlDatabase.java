@@ -32,7 +32,7 @@ public class MysqlDatabase {
         this.playersTableName = "Players";
     }
     
-    public void establishConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+    public synchronized void establishConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
     {
         url = "jdbc:mysql://"+host+"/"+databaseName;
         Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -40,13 +40,19 @@ public class MysqlDatabase {
         //pluginRef.debugMessage("Connection attempt to database -- done");
     }
     
-    public void closeConnection() throws SQLException
+    public synchronized void closeConnection() throws SQLException
     {
         conn.close();
         //pluginRef.debugMessage("Connection close attempt -- done");
     }
     
-    private boolean tableExists(String table)throws Exception
+    public synchronized void resetConnection() throws Exception
+    {
+        closeConnection();
+        establishConnection();
+    }
+    
+    private synchronized boolean tableExists(String table)throws Exception
     {
         Statement s = conn.createStatement();
         s.executeQuery("SHOW TABLES");
@@ -60,14 +66,14 @@ public class MysqlDatabase {
         return ret;
     }
     
-    public void CheckOBTable()throws Exception
+    public synchronized void CheckOBTable()throws Exception
     {
         Statement s = conn.createStatement();
         if (!tableExists("OwnBlocksX"))
             s.executeUpdate("CREATE TABLE " + ownBlocksTableName + " (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), world varchar(50), x INT NOT NULL, y INT NOT NULL, z INT NOT NULL, owner varchar(50) NOT NULL, allowed TEXT, tag varchar(50), time TIMESTAMP )");
     }
     
-    public int addBlock(MysqlBlock mb)
+    public synchronized int addBlock(MysqlBlock mb)
     {
         int ret = -1;
         try {
@@ -84,7 +90,7 @@ public class MysqlDatabase {
         return ret;
     }
     
-    public MysqlBlock getBlock(MysqlBlock mb)
+    public synchronized MysqlBlock getBlock(MysqlBlock mb)
     {
         MysqlBlock ret = null;
         try {
@@ -102,7 +108,7 @@ public class MysqlDatabase {
         return ret;
     }
     
-    public int deleteBlock(MysqlBlock mb)
+    public synchronized int deleteBlock(MysqlBlock mb)
     {
         int ret = -1;
         try {
@@ -115,14 +121,14 @@ public class MysqlDatabase {
         return ret;
     }
     
-    public void CheckPlayersTable()throws Exception
+    public synchronized void CheckPlayersTable()throws Exception
     {
         Statement s = conn.createStatement();
         if (!tableExists("Players"))
             s.executeUpdate("CREATE TABLE " + playersTableName + " (id INT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT, PRIMARY KEY (id), name varchar(50), activated TINYINT)");
     }
     
-    public ResultSet getPlayer(String playerName)
+    public synchronized ResultSet getPlayer(String playerName)
     {
     	ResultSet rs = null;
 		try {
@@ -136,15 +142,32 @@ public class MysqlDatabase {
 		return rs;
     }
     
-    public int addPlayer(String player)
+    public synchronized boolean hasPlayer(String playerName)
+    {
+        ResultSet rs = getPlayer(playerName);
+        boolean ret = false;
+        try {
+            while (rs.next())
+            {
+                if (rs.getString("name").equals(playerName))
+                    ret = true;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return ret;
+    }
+    
+    public synchronized int addPlayer(String player)
     {
         int ret = -1;
         try {
-            if (getPlayer(player) != null)   //check to see if block is already in database for some reason
+            if (hasPlayer(player))
                 return 0;
-        Statement s = conn.createStatement();
-        String value = "("+player+","+"0)";
-        ret = s.executeUpdate("INSERT INTO "+playersTableName+" (name, activated) VALUES " + value);
+            Statement s = conn.createStatement();
+            String value = "('"+player+"',"+"0)";
+            ret = s.executeUpdate("INSERT INTO "+playersTableName+" (name, activated) VALUES " + value);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             pluginRef.log.severe("[OwnBlocksX] Failed to add player.  Probably SQL error");
@@ -153,7 +176,7 @@ public class MysqlDatabase {
         return ret;
     }
     
-    public void setActivated(String player, boolean act)
+    public synchronized void setActivated(String player, boolean act)
     {
         try {
             Statement s = conn.createStatement();
@@ -169,7 +192,7 @@ public class MysqlDatabase {
         }
     }
     
-    public boolean isPlayerActivated(String player)
+    public synchronized boolean isPlayerActivated(String player)
     {
         ResultSet rs = getPlayer(player);
         int ret = 0;

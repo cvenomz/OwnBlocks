@@ -106,6 +106,7 @@ public class OwnBlocks extends JavaPlugin{
         try {
             mysqlDatabase.establishConnection();
             mysqlDatabase.CheckOBTable();
+            mysqlDatabase.CheckPlayersTable();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             log.severe("[OwnBlocksX] Cant initialize MySQL");
@@ -124,6 +125,10 @@ public class OwnBlocks extends JavaPlugin{
         pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
         setupPermissions();
+        
+        OBThread obThread = new OBThread(mysqlDatabase);
+        getServer().getScheduler().scheduleAsyncRepeatingTask(this, obThread, 72000, 72000);
+        
         log.info("[OwnBlocksX] version " + version + " initialized with MySQL");
     
 	}
@@ -150,7 +155,7 @@ public class OwnBlocks extends JavaPlugin{
 					getServer().getPlayer(name).sendMessage(ChatColor.GREEN + "OwnBlocks activated");
 	
 			}*/
-		    if (mysqlDatabase.getPlayer(name) == null)
+		    if (!mysqlDatabase.hasPlayer(name))
 		        mysqlDatabase.addPlayer(name);
 		    mysqlDatabase.setActivated(name, true);
 		    
