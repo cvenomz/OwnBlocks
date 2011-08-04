@@ -200,8 +200,8 @@ public class ConfigManager {
 		str = properties.getProperty("enabled-on-login");
 		if (str != null)
 		{
-			if (str.equalsIgnoreCase("false"))
-				enabledOnLogin = false;
+			if (str.equalsIgnoreCase("true"))
+				enabledOnLogin = true;
 		}
 		
 		//get MySQL config stuff
