@@ -47,7 +47,7 @@ public class OwnBlocks extends JavaPlugin{
 	//private boolean useMySQL = false;
 	private MysqlDatabase mysqlDatabase;
 	private String host,databaseName,username,password;
-	private String version = "0.2.1";
+	private String version = "0.2.2";
 	
 	@Override
 	public void onDisable() {
@@ -144,7 +144,7 @@ public class OwnBlocks extends JavaPlugin{
 		
 	public void addPlayer(String name)
 	{
-		if (hasPermission(name, "OwnBlocks.use"))
+		if (hasPermission(name, "OwnBlocksX.use"))
 		{
 			/*if (!activatedPlayers.contains(name))
 			{
